@@ -1,0 +1,34 @@
+Lets work on this app.
+
+I dont like the current UI of this app.
+So here is what I want you to do.
+The main idea of this web app is to serve as platform that takes in a users rough idea or sketch idea and gives a working strategy on how to go about accomplishing it.
+
+The way the UI works , Plays a critical role in how this app is perceived. 
+
+So it needs to be very clean and elegant.
+
+The app is divided into two main parts.
+
+1) The landing or home page
+2) The actual workspace where the user can interact with the app.
+3)The calendar and task management system
+
+
+1)The home page or landing page is one of the most important parts of these app as it is the very first page the user wiull see before even interacting with our apps. Now, I want you to recall the initial idea behind the app. Every animation on the landing page must reflect this fact. I want 3d animations that respond to user interactions both on the homepage and on the other pages. Flow charts, operations strategies , task assignments , are key functionalities needed in this app.
+all of these must be included in the homepage of the app in an elegant 3d animation. The idea behind the homepage is to show the user what they can do with the app. yo can check online for elegant design ideas , brainstorm and do something natural, fluid  and very good.
+
+2) Now for the actual workspace, I want it to be very clean and elegant.
+Imagine the workspace as a section of the app that gets te user input either through text, audio, image or video. A very good comaprism is the way gemini live works. The main idea behind the multimodal interaction system is to ensure that the user can express their mind in any way they want to, and to their fullest. There are some level of details that having a conversation might be able to accomplish that ordinary typing might not achieve. 
+Also there are subtle differences when it comes to the interaction modes. These differences stem from the fact UI appearance needs to be slightly different to reflect the mode of interaction. For example when the user is using audio , the animation needs to be different from when the user is using text or image or video. The UI needs to be such that it makes the user feel comfortable using it. For the conversation ( real live conversation with an ai), you could do something like a live animation just like the audi converation UI that chat gpt uses. Dont worry I willprovide you with screen shots of some of these UI.
+The goal is to make the interface very fluid to ensure maximum ease of use. It also needs to look very futuristic, modern 
+
+3) Now the calendar and task management system. This is where we get more technical. the idea is to ensure that the user can effectively manage their time and tasks. 
+I suggest having a callendar view and a task view . Each must show the tasks ( and workflow operations) assigned to the user on that day as well as the timelines associated.
+The trasition from calendar view or timeline view to task view is such that clicking on a particular day or task in the calendar or timeline view brings up the task details in the task view in a flow chart or broken down timeline view or milestone view. Just imagine the visuaization as the one done for Notebook Lm Mind map. Inclase you dont I have provided you with an image on how the mind map looks. These is a one of those view. The user can chose a different view from a selectable from a check box. 
+Another view the user can select is a 3d animation view that gives a much more realisitc view(like a 3d circular task carousel that the user can interact with) and makes it easier for task navigation . The image is stored as tasks_view2.png in the design_views folder. The image shows the 3d view for a single task. You need to come up with a 3d view for all the tasks  in the calendar view or timeline view. Not it is dynamic   
+These are just suggestions, feel free to suggest other ideas that you think would make the app more user-friendly and efficient.
+
+The images for the views , have different themes and coloring , I want you to comeup with a unified theme that is constant across the app. Also dont forget to include the toggle for night mode and day mode
+
+
