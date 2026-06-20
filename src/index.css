@@ -50,14 +50,53 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 a { text-decoration: none; color: inherit; }
 img, svg { display: block; }
 
-/* ── DOT GRID (ultra-subtle) ── */
+/* ── DOT GRID (fluid) ── */
 body::before {
   content: "";
   position: fixed; inset: 0;
   pointer-events: none; z-index: -2;
   background-image: radial-gradient(#d4d4d4 0.8px, transparent 0.8px);
-  background-size: 28px 28px;
-  opacity: 0.45;
+  background-size: 26px 26px;
+  opacity: 0.36;
+  animation: fluid-grid 28s linear infinite, fluid-grid-breathe 14s ease-in-out infinite alternate;
+}
+
+@keyframes fluid-grid {
+  0% { background-position: 0 0; }
+  100% { background-position: 52px 52px; }
+}
+
+@keyframes fluid-grid-breathe {
+  0% { transform: scale(1); opacity: 0.32; }
+  100% { transform: scale(1.03); opacity: 0.42; }
+}
+
+.hero-dot-grid {
+  position: absolute;
+  inset: -12%;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(circle at center, rgba(59, 158, 255, 0.22) 0.9px, transparent 1.1px),
+    radial-gradient(circle at center, rgba(124, 92, 252, 0.16) 0.9px, transparent 1.1px);
+  background-size: 34px 34px, 74px 74px;
+  background-position: 0 0, 18px 18px;
+  opacity: 0.52;
+  mix-blend-mode: multiply;
+  mask-image: radial-gradient(circle at center, black 38%, transparent 82%);
+  -webkit-mask-image: radial-gradient(circle at center, black 38%, transparent 82%);
+  animation: hero-grid-drift 24s linear infinite, hero-grid-breathe 12s ease-in-out infinite alternate;
+}
+
+@keyframes hero-grid-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(14px, -10px, 0) scale(1.01); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes hero-grid-breathe {
+  0% { opacity: 0.36; }
+  100% { opacity: 0.56; }
 }
 
 /* ── AURA PULSE ── */

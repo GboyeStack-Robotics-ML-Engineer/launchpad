@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LaunchPadMockup from '../components/ui/LaunchPadMockup';
 
 /* ── Scroll-reveal hook ── */
 const useReveal = (threshold = 0.15) => {
@@ -16,6 +17,30 @@ const useReveal = (threshold = 0.15) => {
     return () => obs.disconnect();
   }, [threshold]);
   return [ref, visible];
+};
+
+/* ── Parallax scroll hook ── */
+const useParallax = (speed = 0.08) => {
+  const ref = useRef(null);
+  const [offset, setOffset] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const windowH = window.innerHeight;
+    // Calculate how far through the viewport the element is
+    const progress = (windowH - rect.top) / (windowH + rect.height);
+    // Map to a parallax offset (-30 to +30)
+    setOffset((progress - 0.5) * 60 * speed);
+  }, [speed]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  return [ref, offset];
 };
 
 /* ── Animated counter ── */
@@ -55,6 +80,92 @@ const RevealSection = ({ children, style, className = '', delay = 0 }) => {
   );
 };
 
+/* ── Product showcase with parallax image ── */
+const ProductShowcase = ({ product, navigate }) => {
+  const [imgRef, parallaxOffset] = useParallax(0.12);
+  const [sectionRef, visible] = useReveal(0.12);
+
+  return (
+    <section
+      ref={sectionRef}
+      style={{
+        padding: '100px 48px', maxWidth: '1300px', margin: '0 auto',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(50px)',
+        transition: 'opacity 0.9s cubic-bezier(0.2,0.8,0.2,1) 0.05s, transform 0.9s cubic-bezier(0.2,0.8,0.2,1) 0.05s',
+      }}
+    >
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: product.reverse ? '1.1fr 1fr' : '1fr 1.1fr',
+        gap: '80px', alignItems: 'center',
+      }}>
+        {/* Text Column */}
+        <div style={{ order: product.reverse ? 2 : 1 }}>
+          <h2 style={{
+            fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', fontWeight: 800,
+            letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '20px',
+            color: 'var(--lp-text)',
+          }}>
+            {product.title}
+          </h2>
+          <p style={{
+            fontSize: '1.05rem', lineHeight: 1.65, color: 'var(--lp-text-2)',
+            marginBottom: '32px', maxWidth: '480px',
+          }}>
+            {product.desc}
+          </p>
+          <button style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '14px 28px', borderRadius: '12px',
+            background: product.ctaColor, color: '#fff',
+            fontWeight: 600, fontSize: '0.95rem',
+            transition: 'all 0.3s cubic-bezier(0.2,0.8,0.2,1)',
+            boxShadow: `0 4px 16px ${product.ctaColor}33`,
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${product.ctaColor}44`; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 16px ${product.ctaColor}33`; }}
+          >
+            {product.cta}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        {/* Image Column — with parallax */}
+        <div
+          ref={imgRef}
+          style={{
+            order: product.reverse ? 1 : 2,
+            borderRadius: '28px',
+            overflow: 'hidden',
+            padding: 0,
+            lineHeight: 0,
+            fontSize: 0,
+            transform: `translateY(${parallaxOffset}px)`,
+            boxShadow: '0 28px 72px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.05)',
+            transition: 'transform 0.5s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.5s cubic-bezier(0.2,0.8,0.2,1)',
+            cursor: 'default',
+            willChange: 'transform',
+          }}
+          onMouseEnter={e => { 
+            e.currentTarget.style.transform = `translateY(${parallaxOffset}px) scale(1.02)`; 
+            e.currentTarget.style.boxShadow = '0 32px 80px rgba(0,0,0,0.16), 0 4px 12px rgba(0,0,0,0.08)';
+          }}
+          onMouseLeave={e => { 
+            e.currentTarget.style.transform = `translateY(${parallaxOffset}px) scale(1)`; 
+            e.currentTarget.style.boxShadow = '0 28px 72px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.05)';
+          }}
+        >
+          <LaunchPadMockup
+            variant={product.variant}
+            style={{ minHeight: product.variant === 'timeline' ? '700px' : '620px' }}
+          />
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
@@ -75,21 +186,19 @@ const LandingPage = () => {
 
   const products = [
     {
-      tag: '🚀 Strategy Engine',
-      tagColor: '#FF5A36',
+      ctaColor: '#FF5A36',
       title: 'Your idea, mapped instantly',
       desc: 'Type, speak, or sketch your concept. LaunchPad\'s AI instantly generates a complete strategy flowchart with connected milestones, tasks, and timelines — ready to execute.',
       cta: 'Discover Strategy Engine',
-      img: '/images/dashboard-mockup.png',
+      variant: 'strategy',
       reverse: false,
     },
     {
-      tag: '📅 Smart Calendar',
-      tagColor: '#6C5CE7',
+      ctaColor: '#6C5CE7',
       title: 'Timelines that build themselves',
       desc: 'Tasks auto-schedule into intelligent timelines. Drag, drop, and rearrange. LaunchPad understands dependencies and adjusts your entire project plan in real-time.',
       cta: 'Explore Smart Calendar',
-      img: '/images/calendar-mockup.png',
+      variant: 'timeline',
       reverse: true,
     },
   ];
@@ -160,6 +269,8 @@ const LandingPage = () => {
         textAlign: 'center', padding: '140px 24px 100px',
         overflow: 'hidden',
       }}>
+        <div className="hero-dot-grid" />
+
         {/* Pastel Aura — recreated with CSS for reliability */}
         <div style={{
           position: 'absolute', top: '50%', left: '50%',
@@ -177,7 +288,7 @@ const LandingPage = () => {
           animation: 'aura-pulse 12s ease-in-out infinite alternate',
         }} />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '880px', width: '100%' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1180px', width: '100%' }}>
           <h1 className="text-display fade-in-up" style={{ marginBottom: '28px' }}>
             From concept to<br/>execution, instantly.
           </h1>
@@ -205,6 +316,12 @@ const LandingPage = () => {
             <button className="btn-secondary" style={{ padding: '15px 32px' }}>
               Explore Products
             </button>
+          </div>
+
+          <div className="fade-in-up" style={{ marginTop: '48px', display: 'flex', justifyContent: 'center', animationDelay: '0.4s' }}>
+            <div style={{ width: 'min(100%, 1120px)' }}>
+              <LaunchPadMockup variant="strategy" style={{ minHeight: '620px' }} />
+            </div>
           </div>
         </div>
 
@@ -273,74 +390,10 @@ const LandingPage = () => {
       </RevealSection>
 
       {/* ═══════════════════════════════════════════
-          PRODUCT SHOWCASES (Pulze alternating layout)
+          PRODUCT SHOWCASES (with parallax)
           ═══════════════════════════════════════════ */}
       {products.map((product, i) => (
-        <RevealSection key={i} style={{
-          padding: '120px 48px', maxWidth: '1300px', margin: '0 auto',
-        }} delay={0.05}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: product.reverse ? '1.1fr 1fr' : '1fr 1.1fr',
-            gap: '80px', alignItems: 'center',
-          }}>
-            {/* Text Column */}
-            <div style={{ order: product.reverse ? 2 : 1 }}>
-              <span style={{
-                display: 'inline-block', fontSize: '0.9rem', fontWeight: 700,
-                color: product.tagColor, marginBottom: '16px', letterSpacing: '0.01em',
-              }}>
-                {product.tag}
-              </span>
-              <h2 style={{
-                fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', fontWeight: 800,
-                letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '20px',
-                color: 'var(--lp-text)',
-              }}>
-                {product.title}
-              </h2>
-              <p style={{
-                fontSize: '1.05rem', lineHeight: 1.65, color: 'var(--lp-text-2)',
-                marginBottom: '32px', maxWidth: '480px',
-              }}>
-                {product.desc}
-              </p>
-              <button style={{
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                padding: '14px 28px', borderRadius: '12px',
-                background: product.tagColor, color: '#fff',
-                fontWeight: 600, fontSize: '0.95rem',
-                transition: 'all 0.3s cubic-bezier(0.2,0.8,0.2,1)',
-                boxShadow: `0 4px 16px ${product.tagColor}33`,
-              }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${product.tagColor}44`; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 16px ${product.tagColor}33`; }}
-              >
-                {product.cta}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
-            </div>
-
-            {/* Image Column */}
-            <div style={{
-              order: product.reverse ? 1 : 2,
-              borderRadius: '16px', overflow: 'hidden',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)',
-              border: '1px solid rgba(0,0,0,0.06)',
-              transition: 'transform 0.5s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.5s cubic-bezier(0.2,0.8,0.2,1)',
-              cursor: 'default',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 30px 80px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.08)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)'; }}
-            >
-              <img
-                src={product.img}
-                alt={product.title}
-                style={{ width: '100%', height: 'auto', display: 'block' }}
-              />
-            </div>
-          </div>
-        </RevealSection>
+        <ProductShowcase key={i} product={product} navigate={navigate} />
       ))}
 
       {/* ═══════════════════════════════════════════
