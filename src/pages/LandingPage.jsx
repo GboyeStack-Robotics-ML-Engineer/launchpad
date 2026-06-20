@@ -19,30 +19,6 @@ const useReveal = (threshold = 0.15) => {
   return [ref, visible];
 };
 
-/* ── Parallax scroll hook ── */
-const useParallax = (speed = 0.08) => {
-  const ref = useRef(null);
-  const [offset, setOffset] = useState(0);
-
-  const handleScroll = useCallback(() => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const windowH = window.innerHeight;
-    // Calculate how far through the viewport the element is
-    const progress = (windowH - rect.top) / (windowH + rect.height);
-    // Map to a parallax offset (-30 to +30)
-    setOffset((progress - 0.5) * 60 * speed);
-  }, [speed]);
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
-
-  return [ref, offset];
-};
-
 /* ── Animated counter ── */
 const Counter = ({ end, suffix = '', duration = 2000 }) => {
   const [count, setCount] = useState(0);
@@ -76,92 +52,6 @@ const RevealSection = ({ children, style, className = '', delay = 0 }) => {
       }}
     >
       {children}
-    </section>
-  );
-};
-
-/* ── Product showcase with parallax image ── */
-const ProductShowcase = ({ product, navigate }) => {
-  const [imgRef, parallaxOffset] = useParallax(0.12);
-  const [sectionRef, visible] = useReveal(0.12);
-
-  return (
-    <section
-      ref={sectionRef}
-      style={{
-        padding: '100px 48px', maxWidth: '1300px', margin: '0 auto',
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(50px)',
-        transition: 'opacity 0.9s cubic-bezier(0.2,0.8,0.2,1) 0.05s, transform 0.9s cubic-bezier(0.2,0.8,0.2,1) 0.05s',
-      }}
-    >
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: product.reverse ? '1.1fr 1fr' : '1fr 1.1fr',
-        gap: '80px', alignItems: 'center',
-      }}>
-        {/* Text Column */}
-        <div style={{ order: product.reverse ? 2 : 1 }}>
-          <h2 style={{
-            fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', fontWeight: 800,
-            letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '20px',
-            color: 'var(--lp-text)',
-          }}>
-            {product.title}
-          </h2>
-          <p style={{
-            fontSize: '1.05rem', lineHeight: 1.65, color: 'var(--lp-text-2)',
-            marginBottom: '32px', maxWidth: '480px',
-          }}>
-            {product.desc}
-          </p>
-          <button style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            padding: '14px 28px', borderRadius: '12px',
-            background: product.ctaColor, color: '#fff',
-            fontWeight: 600, fontSize: '0.95rem',
-            transition: 'all 0.3s cubic-bezier(0.2,0.8,0.2,1)',
-            boxShadow: `0 4px 16px ${product.ctaColor}33`,
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${product.ctaColor}44`; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 16px ${product.ctaColor}33`; }}
-          >
-            {product.cta}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
-        </div>
-
-        {/* Image Column — with parallax */}
-        <div
-          ref={imgRef}
-          style={{
-            order: product.reverse ? 1 : 2,
-            borderRadius: '28px',
-            overflow: 'hidden',
-            padding: 0,
-            lineHeight: 0,
-            fontSize: 0,
-            transform: `translateY(${parallaxOffset}px)`,
-            boxShadow: '0 28px 72px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.05)',
-            transition: 'transform 0.5s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.5s cubic-bezier(0.2,0.8,0.2,1)',
-            cursor: 'default',
-            willChange: 'transform',
-          }}
-          onMouseEnter={e => { 
-            e.currentTarget.style.transform = `translateY(${parallaxOffset}px) scale(1.02)`; 
-            e.currentTarget.style.boxShadow = '0 32px 80px rgba(0,0,0,0.16), 0 4px 12px rgba(0,0,0,0.08)';
-          }}
-          onMouseLeave={e => { 
-            e.currentTarget.style.transform = `translateY(${parallaxOffset}px) scale(1)`; 
-            e.currentTarget.style.boxShadow = '0 28px 72px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.05)';
-          }}
-        >
-          <LaunchPadMockup
-            variant={product.variant}
-            style={{ minHeight: product.variant === 'timeline' ? '700px' : '620px' }}
-          />
-        </div>
-      </div>
     </section>
   );
 };
@@ -243,7 +133,7 @@ const LandingPage = () => {
             >
               {link.label}
               {link.dropdown && (
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
               )}
             </a>
           ))}
@@ -290,7 +180,7 @@ const LandingPage = () => {
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '1180px', width: '100%' }}>
           <h1 className="text-display fade-in-up" style={{ marginBottom: '28px' }}>
-            From concept to<br/>execution, instantly.
+            From concept to<br />execution, instantly.
           </h1>
 
           <p className="text-subtitle fade-in-up" style={{ marginBottom: '20px', animationDelay: '0.1s', maxWidth: '640px', margin: '0 auto 20px' }}>
@@ -318,9 +208,10 @@ const LandingPage = () => {
             </button>
           </div>
 
+          {/* Hero Mockup Preview */}
           <div className="fade-in-up" style={{ marginTop: '48px', display: 'flex', justifyContent: 'center', animationDelay: '0.4s' }}>
             <div style={{ width: 'min(100%, 1120px)' }}>
-              <LaunchPadMockup variant="strategy" style={{ minHeight: '620px' }} />
+              <LaunchPadMockup variant="strategy" style={{ minHeight: '520px' }} />
             </div>
           </div>
         </div>
@@ -390,10 +281,66 @@ const LandingPage = () => {
       </RevealSection>
 
       {/* ═══════════════════════════════════════════
-          PRODUCT SHOWCASES (with parallax)
+          PRODUCT SHOWCASES
           ═══════════════════════════════════════════ */}
       {products.map((product, i) => (
-        <ProductShowcase key={i} product={product} navigate={navigate} />
+        <RevealSection key={i} style={{
+          padding: '100px 48px', maxWidth: '1300px', margin: '0 auto',
+        }} delay={0.05}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: product.reverse ? '1.1fr 1fr' : '1fr 1.1fr',
+            gap: '80px', alignItems: 'center',
+          }}>
+            {/* Text Column */}
+            <div style={{ order: product.reverse ? 2 : 1 }}>
+              <h2 style={{
+                fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', fontWeight: 800,
+                letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '20px',
+                color: 'var(--lp-text)',
+              }}>
+                {product.title}
+              </h2>
+              <p style={{
+                fontSize: '1.05rem', lineHeight: 1.65, color: 'var(--lp-text-2)',
+                marginBottom: '32px', maxWidth: '480px',
+              }}>
+                {product.desc}
+              </p>
+              <button style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                padding: '14px 28px', borderRadius: '12px',
+                background: product.ctaColor, color: '#fff',
+                fontWeight: 600, fontSize: '0.95rem',
+                transition: 'all 0.3s cubic-bezier(0.2,0.8,0.2,1)',
+                boxShadow: `0 4px 16px ${product.ctaColor}33`,
+              }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${product.ctaColor}44`; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 16px ${product.ctaColor}33`; }}
+              >
+                {product.cta}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              </button>
+            </div>
+
+            {/* Mockup Column */}
+            <div style={{
+              order: product.reverse ? 1 : 2,
+              borderRadius: '28px', overflow: 'hidden',
+              boxShadow: '0 28px 72px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.05)',
+              transition: 'transform 0.5s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.5s cubic-bezier(0.2,0.8,0.2,1)',
+              cursor: 'default',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 36px 88px rgba(15,23,42,0.18), 0 4px 12px rgba(15,23,42,0.08)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 28px 72px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.05)'; }}
+            >
+              <LaunchPadMockup
+                variant={product.variant}
+                style={{ minHeight: product.variant === 'timeline' ? '700px' : '620px' }}
+              />
+            </div>
+          </div>
+        </RevealSection>
       ))}
 
       {/* ═══════════════════════════════════════════
@@ -490,9 +437,9 @@ const LandingPage = () => {
             <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
               {/* Social icons */}
               {[
-                <svg key="yt" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.5a3 3 0 0 0-2.1-2.1C19.5 4 12 4 12 4s-7.5 0-9.4.4A3 3 0 0 0 .5 6.5 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.5 3 3 0 0 0 2.1 2.1c1.9.4 9.4.4 9.4.4s7.5 0 9.4-.4a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.5zM9.5 15.5v-7l6.3 3.5-6.3 3.5z"/></svg>,
-                <svg key="li" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 1 1 8.3 6.5a1.78 1.78 0 0 1-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0 0 13 14.19V19h-3v-9h2.9v1.3a3.1 3.1 0 0 1 2.8-1.5c1.95 0 3.3 1.18 3.3 3.65z"/></svg>,
-                <svg key="tw" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 1h3.7l-8.1 9.2L24 23h-7.4l-5.8-7.6L4.5 23H.8l8.6-9.9L0 1h7.6l5.3 7 6-7zm-1.3 19.8h2L6.5 3H4.3l13.3 17.8z"/></svg>,
+                <svg key="yt" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.5a3 3 0 0 0-2.1-2.1C19.5 4 12 4 12 4s-7.5 0-9.4.4A3 3 0 0 0 .5 6.5 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.5 3 3 0 0 0 2.1 2.1c1.9.4 9.4.4 9.4.4s7.5 0 9.4-.4a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.5zM9.5 15.5v-7l6.3 3.5-6.3 3.5z" /></svg>,
+                <svg key="li" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 1 1 8.3 6.5a1.78 1.78 0 0 1-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0 0 13 14.19V19h-3v-9h2.9v1.3a3.1 3.1 0 0 1 2.8-1.5c1.95 0 3.3 1.18 3.3 3.65z" /></svg>,
+                <svg key="tw" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 1h3.7l-8.1 9.2L24 23h-7.4l-5.8-7.6L4.5 23H.8l8.6-9.9L0 1h7.6l5.3 7 6-7zm-1.3 19.8h2L6.5 3H4.3l13.3 17.8z" /></svg>,
               ].map((icon, i) => (
                 <a key={i} href="#" style={{
                   width: '38px', height: '38px', borderRadius: '50%',
