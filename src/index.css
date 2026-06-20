@@ -1,47 +1,163 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* =============================================
+   LAUNCHPAD — PULZE.IO AESTHETIC v2
+   ============================================= */
 
 :root {
-  --md-sys-color-primary: #6750A4;
-  --md-sys-color-on-primary: #FFFFFF;
-  --md-sys-color-primary-container: #EADDFF;
-  --md-sys-color-on-primary-container: #21005D;
-  --md-sys-color-secondary-container: #E8DEF8;
-  --md-sys-color-on-secondary-container: #1D192B;
-  --md-sys-color-background: #F7F2FA;
-  --md-sys-color-on-background: #1D1B20;
-  --md-sys-color-surface: #F3EDF7;
-  --md-sys-color-on-surface: #1D1B20;
-  --md-sys-color-surface-variant: #E7E0EC;
-  --md-sys-color-on-surface-variant: #49454F;
-  --md-sys-color-outline: #79747E;
-  --md-sys-color-outline-variant: #CAC4D0;
-  
-  --gemini-bg: #0D0E15;
+  --lp-void: #FAFAFA;
+  --lp-surface: #FFFFFF;
+  --lp-border: rgba(0, 0, 0, 0.08);
+  --lp-border-hover: rgba(0, 0, 0, 0.16);
+  --lp-text: #0F0F0F;
+  --lp-text-2: #4B4B4B;
+  --lp-muted: #8A8A8A;
+
+  --aura-1: rgba(255, 154, 158, 0.5);
+  --aura-2: rgba(254, 207, 239, 0.5);
+  --aura-3: rgba(161, 196, 253, 0.5);
+  --aura-4: rgba(253, 226, 147, 0.5);
+
+  --lp-shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+  --lp-shadow-md: 0 10px 30px rgba(0,0,0,0.06);
+  --lp-shadow-lg: 0 20px 50px rgba(0,0,0,0.08);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --fluid-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
 html, body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--md-sys-color-background);
-  color: var(--md-sys-color-on-background);
-  height: 100%;
-  width: 100%;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--lp-void);
+  color: var(--lp-text);
+  height: 100%; width: 100%;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+#root { height: 100%; display: flex; flex-direction: column; }
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; outline: none; }
+a { text-decoration: none; color: inherit; }
+img, svg { display: block; }
+
+/* ── DOT GRID (ultra-subtle) ── */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: -2;
+  background-image: radial-gradient(#d4d4d4 0.8px, transparent 0.8px);
+  background-size: 28px 28px;
+  opacity: 0.45;
 }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  background: none;
+/* ── AURA PULSE ── */
+@keyframes aura-pulse {
+  0%   { transform: translate(-50%, -55%) scale(1); opacity: 0.75; }
+  50%  { transform: translate(-50%, -55%) scale(1.06); opacity: 0.9; }
+  100% { transform: translate(-50%, -55%) scale(1); opacity: 0.75; }
+}
+
+/* ── TYPOGRAPHY ── */
+.text-display {
+  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  color: var(--lp-text);
+}
+
+.text-h2 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--lp-text);
+}
+
+.text-subtitle {
+  font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+  font-weight: 400;
+  color: var(--lp-text-2);
+  line-height: 1.55;
+}
+
+/* ── BUTTONS ── */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 28px;
+  background: var(--lp-text); color: #fff;
+  border-radius: var(--radius-md);
+  font-weight: 600; font-size: 1rem;
+  letter-spacing: -0.01em;
+  transition: all 0.3s var(--fluid-ease);
+}
+
+.btn-primary:hover {
+  background: #333;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 28px;
+  background: var(--lp-surface); color: var(--lp-text);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: var(--radius-md);
+  font-weight: 500; font-size: 1rem;
+  letter-spacing: -0.01em;
+  transition: all 0.3s var(--fluid-ease);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.btn-secondary:hover {
+  border-color: rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transform: translateY(-1px);
+}
+
+/* ── CARDS ── */
+.feature-card {
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--lp-shadow-sm);
+  transition: all 0.4s var(--fluid-ease);
+}
+
+.feature-card:hover {
+  box-shadow: var(--lp-shadow-md);
+  transform: translateY(-4px);
+  border-color: rgba(0,0,0,0.12);
+}
+
+/* ── ANIMATION UTILITIES ── */
+.fade-in-up {
+  opacity: 0;
+  animation: fadeInUp 0.8s var(--fluid-ease) forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav { padding: 16px 20px !important; }
+  nav > div:nth-child(2) { display: none !important; }
+
+  .text-display {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
 }

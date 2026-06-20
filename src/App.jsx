@@ -1,43 +1,47 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
+import LandingPage from './pages/LandingPage';
+import WorkspacePage from './pages/WorkspacePage';
+import CalendarPage from './pages/CalendarPage';
+import Sidebar from './components/layout/Sidebar';
 import './App.css';
-import Header from './components/Header';
-import BottomNav from './components/BottomNav';
-import Home from './components/Home';
-import Calendar from './components/Calendar';
-import AIAssistant from './components/AIAssistant';
 
-function App() {
-  const [selectedTab, setSelectedTab] = useState('AI Assistant');
+const SHELL_ROUTES = ['/workspace', '/calendar'];
 
-  const renderContent = () => {
-    switch (selectedTab) {
-      case 'Home':
-        return <Home onStartInterrogation={() => setSelectedTab('AI Assistant')} />;
-      case 'Calendar':
-        return <Calendar />;
-      case 'AI Assistant':
-        return <AIAssistant onClose={() => setSelectedTab('Home')} />;
-      default:
-        return (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'gray' }}>
-            {selectedTab} Screen Content
-          </div>
-        );
-    }
-  };
+const AppLayout = () => {
+  const location = useLocation();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isShell = SHELL_ROUTES.includes(location.pathname);
+
+  if (!isShell) {
+    return (
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+      </Routes>
+    );
+  }
 
   return (
-    <div className="app-container">
-      {selectedTab !== 'AI Assistant' && <Header />}
-      
-      <div className={selectedTab === 'AI Assistant' ? '' : 'content-area'}>
-        {renderContent()}
-      </div>
-
-      {selectedTab !== 'AI Assistant' && (
-        <BottomNav selectedTab={selectedTab} onTabSelected={setSelectedTab} />
-      )}
+    <div className="app-shell">
+      <Sidebar collapsed={sidebarCollapsed} onCollapse={() => setSidebarCollapsed(c => !c)} />
+      <main className="app-main">
+        <Routes>
+          <Route path="/workspace" element={<WorkspacePage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+        </Routes>
+      </main>
     </div>
+  );
+};
+
+function App() {
+  return (
+    <ThemeProvider>
+      <BrowserRouter>
+        <AppLayout />
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
