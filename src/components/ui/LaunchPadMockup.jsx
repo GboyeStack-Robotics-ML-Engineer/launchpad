@@ -122,12 +122,12 @@ const StrategyHeader = () => (
     background: '#FFFFFF',
     flexShrink: 0,
   }}>
-    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: '10px', color: '#94A3B8', marginBottom: '2px', whiteSpace: 'nowrap' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+      <div style={{ minWidth: '200px', flex: '1 1 auto' }}>
+        <div style={{ fontSize: '10.5px', color: '#64748B', fontWeight: 500, marginBottom: '3px' }}>
           Project Strategy › Q4 Product Launch
         </div>
-        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0F172A', margin: 0, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+        <h2 style={{ fontSize: '16px', fontWeight: 800, color: '#0F172A', margin: 0, letterSpacing: '-0.025em' }}>
           Q4 Product Launch Strategy
         </h2>
       </div>
@@ -150,7 +150,7 @@ const StrategyHeader = () => (
 /* ═══════════════════════════════════════════
    STRATEGY MINDMAP CANVAS
    Uses absolute positioning with pixel-based layout
-   and SVG paths that actually connect to node centers
+   and SVG paths that connect precisely to node edges
    ═══════════════════════════════════════════ */
 const StrategyCanvas = () => (
   <div style={{
@@ -159,30 +159,77 @@ const StrategyCanvas = () => (
     overflow: 'hidden',
     minHeight: '380px',
   }}>
+    {/* CSS Keyframes and Styles for fluid animations */}
+    <style dangerouslySetInnerHTML={{__html: `
+      @keyframes flow-dash {
+        to {
+          stroke-dashoffset: -20;
+        }
+      }
+      @keyframes pulse-glow {
+        0%, 100% { filter: drop-shadow(0 0 2px rgba(79, 70, 229, 0.25)); }
+        50% { filter: drop-shadow(0 0 6px rgba(79, 70, 229, 0.6)); }
+      }
+      @keyframes node-float-slow {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+      }
+      @keyframes node-float-delay {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-4px); }
+      }
+      .flow-path {
+        stroke-dasharray: 6, 4;
+        animation: flow-dash 1.2s linear infinite;
+      }
+      .central-node-glow {
+        animation: pulse-glow 3s ease-in-out infinite;
+      }
+      .float-node-1 {
+        animation: node-float-slow 6s ease-in-out infinite;
+      }
+      .float-node-2 {
+        animation: node-float-delay 5s ease-in-out infinite;
+      }
+      .float-node-3 {
+        animation: node-float-slow 7s ease-in-out infinite;
+      }
+      .canvas-node {
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .canvas-node:hover {
+        transform: translateY(-8px) scale(1.02) !important;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08) !important;
+        background: #ffffff !important;
+      }
+    `}} />
+
     {/* SVG Connectors */}
     <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0, zIndex: 0 }}>
-      {/* Center → Research & Discovery (up-right curve) */}
-      <path d="M 170 210 C 200 210, 250 80, 320 80" stroke="#94A3B8" strokeWidth="1.5" fill="none" opacity="0.4" />
-      {/* Center → Strategy & Planning (right curve) */}
-      <path d="M 190 220 C 240 230, 270 240, 310 240" stroke="#3B82F6" strokeWidth="1.5" fill="none" opacity="0.35" />
-      {/* Strategy & Planning → Product Development (arrow) */}
-      <path d="M 440 240 L 500 240" stroke="#CBD5E1" strokeWidth="1.2" fill="none" markerEnd="url(#arrow)" />
-      {/* Product Development → Launch & Growth (arrow) */}
-      <path d="M 630 240 L 690 240" stroke="#CBD5E1" strokeWidth="1.2" fill="none" markerEnd="url(#arrow)" />
-      {/* Center → bottom left bend */}
-      <path d="M 160 230 C 160 280, 300 290, 320 260" stroke="#94A3B8" strokeWidth="1.5" fill="none" opacity="0.3" />
-      <defs>
-        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-          <polygon points="0 0, 8 3, 0 6" fill="#CBD5E1" />
-        </marker>
-      </defs>
+      {/* Center (x:80, y:195, w:140, h:38 -> right-mid is 220, 214) 
+          -> Research (x:280, y:30, w:170, h:110 -> left-mid is 280, 85) */}
+      <path d="M 220 214 C 250 214, 250 85, 280 85" stroke="#10B981" strokeWidth="1.8" fill="none" opacity="0.65" className="flow-path" />
+      <path d="M 220 214 C 250 214, 250 85, 280 85" stroke="#D1FAE5" strokeWidth="3.5" fill="none" opacity="0.3" />
+
+      {/* Center (220, 214) -> Strategy (x:280, y:175, w:170, h:120 -> left-mid is 280, 235) */}
+      <path d="M 220 214 C 250 214, 250 235, 280 235" stroke="#3B82F6" strokeWidth="1.8" fill="none" opacity="0.65" className="flow-path" />
+      <path d="M 220 214 C 250 214, 250 235, 280 235" stroke="#DBEAFE" strokeWidth="3.5" fill="none" opacity="0.3" />
+
+      {/* Strategy (right-mid is 450, 235) -> Product (x:485, y:175, w:170, h:120 -> left-mid is 485, 235) */}
+      <path d="M 450 235 L 485 235" stroke="#F59E0B" strokeWidth="1.8" fill="none" opacity="0.65" className="flow-path" />
+      <path d="M 450 235 L 485 235" stroke="#FEF3C7" strokeWidth="3.5" fill="none" opacity="0.3" />
+
+      {/* Product (right-mid is 655, 235) -> Launch (x:690, y:175, w:170, h:120 -> left-mid is 690, 235) */}
+      <path d="M 655 235 L 690 235" stroke="#A855F7" strokeWidth="1.8" fill="none" opacity="0.65" className="flow-path" />
+      <path d="M 655 235 L 690 235" stroke="#F3E8FF" strokeWidth="3.5" fill="none" opacity="0.3" />
     </svg>
 
     {/* ── Central Node ── */}
-    <div style={{
+    <div className="central-node-glow canvas-node" style={{
       position: 'absolute',
       left: '80px', top: '195px',
-      padding: '8px 16px',
+      width: '140px', height: '38px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'linear-gradient(135deg, #4F46E5, #6366F1)',
       color: '#FFFFFF',
       borderRadius: '10px',
@@ -194,18 +241,19 @@ const StrategyCanvas = () => (
     </div>
 
     {/* ── Research & Discovery ── */}
-    <div style={{
+    <div className="float-node-1 canvas-node" style={{
       position: 'absolute', left: '280px', top: '30px',
+      width: '170px', height: '110px',
       background: '#FFFFFF', border: '2px solid #D1FAE5', borderRadius: '12px',
-      padding: '12px 14px', minWidth: '150px',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.04)', zIndex: 2,
+      padding: '12px 14px',
+      boxShadow: '0 4px 12px rgba(15,23,42,0.03)', zIndex: 2,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', paddingBottom: '6px', borderBottom: '1px solid #D1FAE5' }}>
         <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10B981' }} />
         <span style={{ fontSize: '11px', fontWeight: 700, color: '#1E293B' }}>Research & Discovery</span>
       </div>
       {['Market Research', 'Competitor Analysis', 'User Interviews'].map((item, j) => (
-        <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#64748B', fontWeight: 500, marginBottom: '3px' }}>
+        <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#64748B', fontWeight: 500, marginBottom: '4px' }}>
           <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#10B981', opacity: 0.5 }} />
           {item}
         </div>
@@ -213,18 +261,19 @@ const StrategyCanvas = () => (
     </div>
 
     {/* ── Strategy & Planning ── */}
-    <div style={{
+    <div className="float-node-2 canvas-node" style={{
       position: 'absolute', left: '280px', top: '175px',
+      width: '170px', height: '120px',
       background: '#FFFFFF', border: '2px solid #DBEAFE', borderRadius: '12px',
-      padding: '12px 14px', minWidth: '150px',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.04)', zIndex: 2,
+      padding: '12px 14px',
+      boxShadow: '0 4px 12px rgba(15,23,42,0.03)', zIndex: 2,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', paddingBottom: '6px', borderBottom: '1px solid #DBEAFE' }}>
         <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#3B82F6' }} />
         <span style={{ fontSize: '11px', fontWeight: 700, color: '#1E293B' }}>Strategy & Planning</span>
       </div>
       {['Define Objectives', 'Target Audience', 'MVP Features', 'Roadmap'].map((item, j) => (
-        <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#64748B', fontWeight: 500, marginBottom: '3px' }}>
+        <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#64748B', fontWeight: 500, marginBottom: '4px' }}>
           <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#3B82F6', opacity: 0.5 }} />
           {item}
         </div>
@@ -232,18 +281,19 @@ const StrategyCanvas = () => (
     </div>
 
     {/* ── Product Development ── */}
-    <div style={{
-      position: 'absolute', left: '475px', top: '175px',
+    <div className="float-node-3 canvas-node" style={{
+      position: 'absolute', left: '485px', top: '175px',
+      width: '170px', height: '120px',
       background: '#FFFFFF', border: '2px solid #FEF3C7', borderRadius: '12px',
-      padding: '12px 14px', minWidth: '150px',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.04)', zIndex: 2,
+      padding: '12px 14px',
+      boxShadow: '0 4px 12px rgba(15,23,42,0.03)', zIndex: 2,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', paddingBottom: '6px', borderBottom: '1px solid #FEF3C7' }}>
         <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#F59E0B' }} />
         <span style={{ fontSize: '11px', fontWeight: 700, color: '#1E293B' }}>Product Development</span>
       </div>
       {['Sprint 1 (Design)', 'Sprint 2 (Build)', 'QA Testing', 'Beta Release'].map((item, j) => (
-        <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#64748B', fontWeight: 500, marginBottom: '3px' }}>
+        <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#64748B', fontWeight: 500, marginBottom: '4px' }}>
           <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#F59E0B', opacity: 0.5 }} />
           {item}
         </div>
@@ -251,18 +301,19 @@ const StrategyCanvas = () => (
     </div>
 
     {/* ── Launch & Growth ── */}
-    <div style={{
-      position: 'absolute', left: '665px', top: '175px',
+    <div className="float-node-1 canvas-node" style={{
+      position: 'absolute', left: '690px', top: '175px',
+      width: '170px', height: '120px',
       background: '#FFFFFF', border: '2px solid #F3E8FF', borderRadius: '12px',
-      padding: '12px 14px', minWidth: '150px',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.04)', zIndex: 2,
+      padding: '12px 14px',
+      boxShadow: '0 4px 12px rgba(15,23,42,0.03)', zIndex: 2,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', paddingBottom: '6px', borderBottom: '1px solid #F3E8FF' }}>
         <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#A855F7' }} />
         <span style={{ fontSize: '11px', fontWeight: 700, color: '#1E293B' }}>Launch & Growth</span>
       </div>
       {['Marketing Campaign', 'Launch Day', 'Post-Launch Support', 'Data Analysis'].map((item, j) => (
-        <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#64748B', fontWeight: 500, marginBottom: '3px' }}>
+        <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#64748B', fontWeight: 500, marginBottom: '4px' }}>
           <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#A855F7', opacity: 0.5 }} />
           {item}
         </div>

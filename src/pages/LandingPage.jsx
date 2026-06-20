@@ -1,6 +1,242 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LaunchPadMockup from '../components/ui/LaunchPadMockup';
+import RocketPreloader from '../components/ui/RocketPreloader';
+
+// Custom lightweight showcase components to prevent jampacked look in grid columns
+const StrategyShowcaseMockup = () => {
+  return (
+    <div style={{
+      background: '#FFFFFF',
+      borderRadius: '24px',
+      padding: '32px',
+      border: '1px solid rgba(0,0,0,0.08)',
+      boxShadow: '0 20px 45px rgba(0,0,0,0.04)',
+      width: '100%',
+      fontFamily: "'Plus Jakarta Sans', sans-serif"
+    }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes line-draw {
+          to { stroke-dashoffset: 0; }
+        }
+        .showcase-flow-path {
+          stroke-dasharray: 8;
+          stroke-dashoffset: 40;
+          animation: line-draw 2s linear infinite;
+        }
+      `}} />
+      
+      {/* Simulation Box */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        background: '#F8FAFC',
+        border: '1.5px solid #E2E8F0',
+        borderRadius: '12px',
+        padding: '10px 14px',
+        marginBottom: '24px',
+        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.01)'
+      }}>
+        <span style={{ marginRight: '8px', color: '#4F46E5', fontWeight: 700, fontSize: '12px' }}>✦ AI Input:</span>
+        <div style={{ flex: 1, fontSize: '11px', fontWeight: 600, color: '#334155' }}>
+          Create launch strategy for a SaaS product...
+        </div>
+        <div style={{
+          fontSize: '9px',
+          fontWeight: 700,
+          background: 'linear-gradient(135deg, #4F46E5, #6366F1)',
+          color: '#fff',
+          padding: '4px 10px',
+          borderRadius: '6px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em'
+        }}>Mapped</div>
+      </div>
+
+      {/* Showcase Nodes */}
+      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}>
+          <path d="M 30 35 L 30 180" stroke="#E2E8F0" strokeWidth="2" fill="none" />
+          <path d="M 30 35 Q 30 80, 80 80" stroke="#10B981" strokeWidth="2" fill="none" strokeDasharray="4" />
+          <path d="M 30 80 Q 30 130, 80 130" stroke="#3B82F6" strokeWidth="2" fill="none" className="showcase-flow-path" />
+          <path d="M 30 130 Q 30 180, 80 180" stroke="#94A3B8" strokeWidth="2" fill="none" />
+        </svg>
+
+        {/* Central Node */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          background: 'linear-gradient(135deg, #4F46E5, #6366F1)',
+          color: '#FFFFFF',
+          padding: '10px 16px',
+          borderRadius: '10px',
+          width: 'fit-content',
+          boxShadow: '0 8px 20px rgba(79, 70, 229, 0.2)',
+          zIndex: 1
+        }}>
+          <span style={{ fontSize: '16px' }}>🎯</span>
+          <div>
+            <div style={{ fontSize: '12px', fontWeight: 700 }}>Q4 Launch Strategy</div>
+            <div style={{ fontSize: '8px', opacity: 0.8 }}>Primary Node</div>
+          </div>
+        </div>
+
+        {/* Research Node */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          background: '#FFFFFF',
+          border: '1.5px solid #D1FAE5',
+          borderRadius: '10px',
+          padding: '8px 14px',
+          marginLeft: '80px',
+          boxShadow: '0 4px 12px rgba(16, 185, 129, 0.04)',
+          zIndex: 1,
+        }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981' }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#1E293B' }}>Research & Discovery</div>
+            <div style={{ fontSize: '9px', color: '#64748B' }}>Competitor Analysis, Personas</div>
+          </div>
+          <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#10B981', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>Done</span>
+        </div>
+
+        {/* Strategy Node */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          background: '#FFFFFF',
+          border: '1.5px solid #DBEAFE',
+          borderRadius: '10px',
+          padding: '8px 14px',
+          marginLeft: '80px',
+          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.04)',
+          zIndex: 1,
+        }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3B82F6' }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#1E293B' }}>Strategy & Planning</div>
+            <div style={{ fontSize: '9px', color: '#64748B' }}>MVP features, Core roadmap</div>
+          </div>
+          <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#3B82F6', background: 'rgba(59, 130, 246, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>Active</span>
+        </div>
+
+        {/* Launch Node */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          background: '#FFFFFF',
+          border: '1.5px solid #F1F5F9',
+          borderRadius: '10px',
+          padding: '8px 14px',
+          marginLeft: '80px',
+          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.01)',
+          zIndex: 1,
+        }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#94A3B8' }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#64748B' }}>Launch & Growth</div>
+            <div style={{ fontSize: '9px', color: '#94A3B8' }}>Marketing campaigns, Support</div>
+          </div>
+          <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#94A3B8', background: 'rgba(148, 163, 184, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>Queue</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TimelineShowcaseMockup = () => {
+  const tasks = [
+    { name: 'Wireframing Design', start: 0, width: 45, color: '#8B5CF6', progress: 100, status: 'Done' },
+    { name: 'Core API Integration', start: 40, width: 35, color: '#3B82F6', progress: 65, status: 'In Progress' },
+    { name: 'Beta Launch Campaign', start: 70, width: 25, color: '#EC4899', progress: 0, status: 'Planned' }
+  ];
+
+  return (
+    <div style={{
+      background: '#FFFFFF',
+      borderRadius: '24px',
+      padding: '32px',
+      border: '1px solid rgba(0,0,0,0.08)',
+      boxShadow: '0 20px 45px rgba(0,0,0,0.04)',
+      width: '100%',
+      fontFamily: "'Plus Jakarta Sans', sans-serif"
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div>
+          <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E293B' }}>Milestone Auto-Scheduler</div>
+          <div style={{ fontSize: '9.5px', color: '#64748B', marginTop: '2px' }}>Real-time dependency resolution</div>
+        </div>
+        <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#10B981', background: 'rgba(16, 185, 129, 0.12)', padding: '4px 10px', borderRadius: '20px' }}>
+          Auto Sync
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {tasks.map((task, i) => (
+          <div key={i}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+              <span>{task.name}</span>
+              <span style={{ color: task.progress === 100 ? '#10B981' : task.progress > 0 ? '#3B82F6' : '#64748B' }}>
+                {task.status} ({task.progress}%)
+              </span>
+            </div>
+            <div style={{
+              position: 'relative',
+              height: '32px',
+              background: '#F8FAFC',
+              borderRadius: '8px',
+              border: '1px solid #E2E8F0',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                left: `${task.start}%`,
+                width: `${task.width}%`,
+                height: '100%',
+                background: `linear-gradient(135deg, ${task.color}, ${task.color}CC)`,
+                borderRadius: '7px',
+                boxShadow: `0 4px 12px ${task.color}25`,
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 12px',
+                transition: 'all 0.5s ease'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  height: '3px',
+                  width: `${task.progress}%`,
+                  background: '#FFFFFF',
+                  opacity: 0.6
+                }} />
+                
+                <div style={{ display: 'flex', marginLeft: 'auto' }}>
+                  {[0, 1].map(j => (
+                    <div key={j} style={{
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      background: `hsl(${(i * 90 + j * 120) % 360}, 70%, 75%)`,
+                      border: '1.5px solid #FFFFFF',
+                      marginLeft: j > 0 ? '-6px' : '0'
+                    }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 
 /* ── Scroll-reveal hook ── */
 const useReveal = (threshold = 0.15) => {
@@ -60,6 +296,14 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [builtFor, setBuiltFor] = useState(0);
+  const [showPreloader, setShowPreloader] = useState(() => {
+    return !sessionStorage.getItem('launchpad_preloader_seen');
+  });
+
+  const handlePreloaderComplete = useCallback(() => {
+    sessionStorage.setItem('launchpad_preloader_seen', 'true');
+    setShowPreloader(false);
+  }, []);
   const audiences = ['Founders', 'Product Teams', 'Creators', 'Startups', 'Agencies'];
 
   useEffect(() => {
@@ -208,12 +452,8 @@ const LandingPage = () => {
             </button>
           </div>
 
-          {/* Hero Mockup Preview */}
-          <div className="fade-in-up" style={{ marginTop: '48px', display: 'flex', justifyContent: 'center', animationDelay: '0.4s' }}>
-            <div style={{ width: 'min(100%, 1120px)' }}>
-              <LaunchPadMockup variant="strategy" style={{ minHeight: '520px' }} />
-            </div>
-          </div>
+          {/* Hero Mockup removed on load as requested, will scroll-reveal below */}
+          <div style={{ height: '32px' }} />
         </div>
 
         {/* Trusted By — pinned near bottom of hero */}
@@ -226,6 +466,53 @@ const LandingPage = () => {
           </p>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════
+          SCROLL-REVEALED ANIMATED DASHBOARD VIEW
+          ═══════════════════════════════════════════ */}
+      <RevealSection style={{
+        padding: '0 24px 80px',
+        maxWidth: '1200px',
+        margin: '0 auto',
+      }}>
+        <div style={{
+          background: 'rgba(255,255,255,0.7)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(0,0,0,0.06)',
+          borderRadius: '24px',
+          padding: '24px',
+          boxShadow: '0 30px 70px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.02)',
+          transition: 'all 0.5s var(--fluid-ease)',
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '16px',
+            padding: '0 8px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff5f57' }} />
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ffbd2e' }} />
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#28c840' }} />
+              <span style={{ marginLeft: '12px', fontSize: '12px', fontWeight: 700, color: 'var(--lp-text-2)', letterSpacing: '-0.01em' }}>LaunchPad Strategy Canvas</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                color: '#4F46E5',
+                background: 'rgba(79,70,229,0.1)',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>Interactive Demo</span>
+            </div>
+          </div>
+          <LaunchPadMockup variant="strategy" style={{ minHeight: '520px' }} />
+        </div>
+      </RevealSection>
 
       {/* ═══════════════════════════════════════════
           LOGO CLOUD
@@ -330,14 +617,16 @@ const LandingPage = () => {
               boxShadow: '0 28px 72px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.05)',
               transition: 'transform 0.5s cubic-bezier(0.2,0.8,0.2,1), box-shadow 0.5s cubic-bezier(0.2,0.8,0.2,1)',
               cursor: 'default',
+              width: '100%',
             }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 36px 88px rgba(15,23,42,0.18), 0 4px 12px rgba(15,23,42,0.08)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 28px 72px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.05)'; }}
             >
-              <LaunchPadMockup
-                variant={product.variant}
-                style={{ minHeight: product.variant === 'timeline' ? '700px' : '620px' }}
-              />
+              {product.variant === 'strategy' ? (
+                <StrategyShowcaseMockup />
+              ) : (
+                <TimelineShowcaseMockup />
+              )}
             </div>
           </div>
         </RevealSection>
@@ -490,6 +779,9 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+      {showPreloader && (
+        <RocketPreloader onComplete={handlePreloaderComplete} />
+      )}
     </div>
   );
 };
