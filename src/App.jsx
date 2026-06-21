@@ -4,6 +4,8 @@ import { ThemeProvider } from './context/ThemeContext';
 import LandingPage from './pages/LandingPage';
 import WorkspacePage from './pages/WorkspacePage';
 import CalendarPage from './pages/CalendarPage';
+import IntakePage from './pages/IntakePage';
+import BuilderPage from './pages/BuilderPage';
 import Sidebar from './components/layout/Sidebar';
 import './App.css';
 
@@ -18,6 +20,8 @@ const AppLayout = () => {
     return (
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/intake" element={<IntakePage />} />
+        <Route path="/builder" element={<BuilderPage />} />
       </Routes>
     );
   }

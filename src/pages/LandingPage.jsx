@@ -296,13 +296,12 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [builtFor, setBuiltFor] = useState(0);
-  const [showPreloader, setShowPreloader] = useState(() => {
-    return !sessionStorage.getItem('launchpad_preloader_seen');
-  });
+  const [showPreloader, setShowPreloader] = useState(true);
+  const [landingVisible, setLandingVisible] = useState(false);
 
   const handlePreloaderComplete = useCallback(() => {
-    sessionStorage.setItem('launchpad_preloader_seen', 'true');
     setShowPreloader(false);
+    setLandingVisible(true);
   }, []);
   const audiences = ['Founders', 'Product Teams', 'Creators', 'Startups', 'Agencies'];
 
@@ -338,7 +337,23 @@ const LandingPage = () => {
   ];
 
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '100vh' }}>
+    <div style={{
+      position: 'relative',
+      width: '100%',
+      minHeight: '100vh',
+      height: showPreloader ? '100vh' : 'auto',
+      overflowY: showPreloader ? 'hidden' : 'visible',
+      overflowX: 'hidden',
+      background: '#FAFAFA'
+    }}>
+      <div style={{
+        opacity: landingVisible ? 1 : 0,
+        transform: landingVisible ? 'translateY(0)' : 'translateY(24px)',
+        transition: 'opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1), transform 1.4s cubic-bezier(0.25, 1, 0.5, 1)',
+        width: '100%',
+        minHeight: '100vh',
+        pointerEvents: landingVisible ? 'auto' : 'none',
+      }}>
 
       {/* ═══════════════════════════════════════════
           NAV
@@ -388,7 +403,7 @@ const LandingPage = () => {
             onMouseEnter={e => e.currentTarget.style.color = '#666'}
             onMouseLeave={e => e.currentTarget.style.color = 'var(--lp-text)'}
           >Login</button>
-          <button onClick={() => navigate('/workspace')} className="btn-primary" style={{ padding: '10px 22px', fontSize: '0.9rem', borderRadius: '10px' }}>
+          <button onClick={() => navigate('/intake')} className="btn-primary" style={{ padding: '10px 22px', fontSize: '0.9rem', borderRadius: '10px' }}>
             Get Started
           </button>
         </div>
@@ -444,7 +459,7 @@ const LandingPage = () => {
           </div>
 
           <div className="fade-in-up" style={{ display: 'flex', gap: '14px', justifyContent: 'center', animationDelay: '0.3s' }}>
-            <button onClick={() => navigate('/workspace')} className="btn-primary" style={{ padding: '15px 32px' }}>
+            <button onClick={() => navigate('/intake')} className="btn-primary" style={{ padding: '15px 32px' }}>
               Get Started
             </button>
             <button className="btn-secondary" style={{ padding: '15px 32px' }}>
@@ -475,43 +490,7 @@ const LandingPage = () => {
         maxWidth: '1200px',
         margin: '0 auto',
       }}>
-        <div style={{
-          background: 'rgba(255,255,255,0.7)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(0,0,0,0.06)',
-          borderRadius: '24px',
-          padding: '24px',
-          boxShadow: '0 30px 70px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.02)',
-          transition: 'all 0.5s var(--fluid-ease)',
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '16px',
-            padding: '0 8px',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff5f57' }} />
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ffbd2e' }} />
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#28c840' }} />
-              <span style={{ marginLeft: '12px', fontSize: '12px', fontWeight: 700, color: 'var(--lp-text-2)', letterSpacing: '-0.01em' }}>LaunchPad Strategy Canvas</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{
-                fontSize: '10px',
-                fontWeight: 700,
-                color: '#4F46E5',
-                background: 'rgba(79,70,229,0.1)',
-                padding: '3px 8px',
-                borderRadius: '6px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}>Interactive Demo</span>
-            </div>
-          </div>
-          <LaunchPadMockup variant="strategy" style={{ minHeight: '520px' }} />
-        </div>
+        <LaunchPadMockup variant="strategy" style={{ minHeight: '520px' }} />
       </RevealSection>
 
       {/* ═══════════════════════════════════════════
@@ -696,7 +675,7 @@ const LandingPage = () => {
           }}>
             Every LaunchPad product is shaped by real execution experience. We tackle the real problems in project management.
           </p>
-          <button onClick={() => navigate('/workspace')} className="btn-primary" style={{
+          <button onClick={() => navigate('/intake')} className="btn-primary" style={{
             padding: '16px 36px', fontSize: '1.05rem', borderRadius: '12px',
           }}>
             Start Now
@@ -779,6 +758,7 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+      </div>
       {showPreloader && (
         <RocketPreloader onComplete={handlePreloaderComplete} />
       )}

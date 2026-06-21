@@ -32,3 +32,26 @@ These are just suggestions, feel free to suggest other ideas that you think woul
 The images for the views , have different themes and coloring , I want you to comeup with a unified theme that is constant across the app. Also dont forget to include the toggle for night mode and day mode
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Now let move into rhe design of the dashboard. Now there is a particular logic to how I want the flow of operations to look like. 
+When the user clicks on get started , for now , let it reroute to a the page that askes the user for their prompt A very good example is what is shown in the image above. 
+The reason for using this type pf layout is to ensure minimal distractions for the user and maximum focus on the task at hand. 
+when the user clicks on the enter button, it should transfer them to much more detailed page like what is shown in the second image above. The second image is just what I want it to look like. After creating this page, you need to edit some stuffs on the page so it alligns with our launch pad idea. There also has to be a button that allows the user to move to dashboard view when interactions and go ahead have been made . But worry less about the dashboard viwe for now and lets focus the previously discussed sections
+ 
+
+
