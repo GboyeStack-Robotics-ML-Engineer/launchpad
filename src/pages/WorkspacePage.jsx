@@ -1,436 +1,679 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import MorphBlob from '../components/ui/MorphBlob';
-import FlowChart from '../components/ui/FlowChart';
 
-const MODES = [
-  { id: 'text', label: 'Text', icon: '✦', color: '#7C5CFC', glow: 'rgba(124,92,252,0.25)' },
-  { id: 'audio', label: 'Audio', icon: '◎', color: '#3B9EFF', glow: 'rgba(59,158,255,0.25)' },
-  { id: 'image', label: 'Image', icon: '◈', color: '#2BDFB0', glow: 'rgba(43,223,176,0.25)' },
-  { id: 'video', label: 'Video', icon: '⬡', color: '#FF6B9D', glow: 'rgba(255,107,157,0.25)' },
+const initialNodes = [
+  {
+    id: 'strategy-root',
+    type: 'root',
+    title: 'Project Strategy',
+    x: 40,
+    y: 260,
+    w: 210,
+    h: 56,
+    color: '#4F46E5',
+    bullets: []
+  },
+  {
+    id: 'research',
+    type: 'research',
+    title: 'Research & Discovery',
+    x: 350,
+    y: 40,
+    w: 240,
+    h: 160,
+    color: '#10B981',
+    bgColor: '#FFFFFF',
+    borderColor: '#E6F4EA',
+    bullets: ['Market Research', 'Competitor Analysis', 'User Interviews']
+  },
+  {
+    id: 'planning',
+    type: 'planning',
+    title: 'Strategy & Planning',
+    x: 350,
+    y: 320,
+    w: 240,
+    h: 180,
+    color: '#3B82F6',
+    bgColor: '#FFFFFF',
+    borderColor: '#E8F0FE',
+    bullets: ['Define Objectives', 'Target Audience', 'MVP Features', 'Roadmap']
+  },
+  {
+    id: 'development',
+    type: 'development',
+    title: 'Product Development',
+    x: 670,
+    y: 320,
+    w: 240,
+    h: 180,
+    color: '#F59E0B',
+    bgColor: '#FFFFFF',
+    borderColor: '#FEF7E0',
+    bullets: ['Sprint 1 (Design)', 'Sprint 2 (Build)', 'QA Testing', 'Beta Release']
+  },
+  {
+    id: 'growth',
+    type: 'growth',
+    title: 'Launch & Growth',
+    x: 990,
+    y: 320,
+    w: 240,
+    h: 180,
+    color: '#8B5CF6',
+    bgColor: '#FFFFFF',
+    borderColor: '#F3E8FF',
+    bullets: ['Marketing Campaign', 'Launch Day', 'Post-Launch Support', 'Data Analysis']
+  }
 ];
 
-const VOICE_STATES = { IDLE: 'idle', LISTENING: 'listening', PROCESSING: 'processing', SPEAKING: 'speaking' };
-
-const mockResponses = [
-  { id: 1, role: 'ai', text: 'Hello! Share your idea — type it out, speak it, or upload an image or video. I\'ll turn it into a clear, actionable strategy.', ts: '2:31 PM' },
+const initialConnections = [
+  { from: 'strategy-root', to: 'research', color: '#34D399' },
+  { from: 'strategy-root', to: 'planning', color: '#60A5FA' },
+  { from: 'planning', to: 'development', color: '#FBBF24' },
+  { from: 'development', to: 'growth', color: '#A78BFA' }
 ];
 
 const WorkspacePage = () => {
   const navigate = useNavigate();
-  const [activeMode, setActiveMode] = useState('text');
-  const [messages, setMessages] = useState(mockResponses);
-  const [inputText, setInputText] = useState('');
-  const [voiceState, setVoiceState] = useState(VOICE_STATES.IDLE);
-  const [showStrategy, setShowStrategy] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [sidebarOpen] = useState(true);
-  const messagesEndRef = useRef(null);
-  const fileInputRef = useRef(null);
 
-  const currentMode = MODES.find(m => m.id === activeMode);
+  // Nodes and Connections State
+  const [nodes, setNodes] = useState(initialNodes);
+  const [connections, setConnections] = useState(initialConnections);
 
-  const sendMessage = (text) => {
-    if (!text.trim()) return;
-    const userMsg = { id: Date.now(), role: 'user', text, ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-    setMessages(prev => [...prev, userMsg]);
-    setInputText('');
+  // Toast State
+  const [toastMessage, setToastMessage] = useState('');
+  
+  // Modals State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Add Node Form State
+  const [newNodeTitle, setNewNodeTitle] = useState('');
+  const [newNodeCategory, setNewNodeCategory] = useState('planning');
+  const [newNodeParent, setNewNodeParent] = useState('strategy-root');
+  const [newNodeBullets, setNewNodeBullets] = useState('');
+
+  // Edit Node Form State
+  const [selectedNodeForEdit, setSelectedNodeForEdit] = useState(null);
+  const [editNodeTitle, setEditNodeTitle] = useState('');
+  const [editNodeBullets, setEditNodeBullets] = useState('');
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
     setTimeout(() => {
-      setShowStrategy(true);
-      const aiMsg = {
-        id: Date.now() + 1,
-        role: 'ai',
-        text: '✦ Strategy generated! I\'ve analyzed your idea and created a structured action plan. Here\'s your roadmap:',
-        strategy: true,
-        ts: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-      setMessages(prev => [...prev, aiMsg]);
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-    }, 1200);
+      setToastMessage('');
+    }, 3000);
   };
 
-  const handleVoiceToggle = () => {
-    if (voiceState === VOICE_STATES.IDLE) {
-      setVoiceState(VOICE_STATES.LISTENING);
-      setTimeout(() => {
-        setVoiceState(VOICE_STATES.PROCESSING);
-        setTimeout(() => {
-          setVoiceState(VOICE_STATES.SPEAKING);
-          sendMessage('I want to build a SaaS platform for project management');
-          setTimeout(() => setVoiceState(VOICE_STATES.IDLE), 3000);
-        }, 1500);
-      }, 3000);
-    } else {
-      setVoiceState(VOICE_STATES.IDLE);
-    }
-  };
-
-  const handleFileDrop = (e) => {
+  const handleAddNodeSubmit = (e) => {
     e.preventDefault();
-    setIsDragOver(false);
-    const file = e.dataTransfer?.files[0] || e.target?.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const url = URL.createObjectURL(file);
-      setUploadedImage(url);
+    if (!newNodeTitle.trim()) return;
+
+    const parentNode = nodes.find(n => n.id === newNodeParent);
+    if (!parentNode) return;
+
+    // Place new node next to its parent, offset depending on sibling count
+    const siblings = connections.filter(c => c.from === parentNode.id);
+    const offsetX = parentNode.w + 80;
+    const offsetY = (siblings.length * 190) - 80;
+
+    const newId = `node-${Date.now()}`;
+    const categoryThemes = {
+      research: { color: '#10B981', bgColor: '#FFFFFF', borderColor: '#E6F4EA' },
+      planning: { color: '#3B82F6', bgColor: '#FFFFFF', borderColor: '#E8F0FE' },
+      development: { color: '#F59E0B', bgColor: '#FFFFFF', borderColor: '#FEF7E0' },
+      growth: { color: '#8B5CF6', bgColor: '#FFFFFF', borderColor: '#F3E8FF' }
+    };
+    const theme = categoryThemes[newNodeCategory] || categoryThemes.planning;
+
+    const createdNode = {
+      id: newId,
+      type: newNodeCategory,
+      title: newNodeTitle,
+      x: parentNode.x + offsetX,
+      y: parentNode.y + offsetY,
+      w: 240,
+      h: 160,
+      bullets: newNodeBullets.split('\n').filter(b => b.trim()),
+      ...theme
+    };
+
+    setNodes(prev => [...prev, createdNode]);
+    setConnections(prev => [...prev, { from: parentNode.id, to: newId, color: theme.color + 'A0' }]);
+    
+    // Reset Form
+    setNewNodeTitle('');
+    setNewNodeBullets('');
+    setIsAddModalOpen(false);
+    showToast(`✓ Node "${newNodeTitle}" added successfully!`);
+  };
+
+  const handleEditNodeClick = (node) => {
+    setSelectedNodeForEdit(node);
+    setEditNodeTitle(node.title);
+    setEditNodeBullets(node.bullets.join('\n'));
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditNodeSubmit = (e) => {
+    e.preventDefault();
+    if (!selectedNodeForEdit) return;
+
+    setNodes(prev => prev.map(n => {
+      if (n.id === selectedNodeForEdit.id) {
+        return {
+          ...n,
+          title: editNodeTitle,
+          bullets: editNodeBullets.split('\n').filter(b => b.trim())
+        };
+      }
+      return n;
+    }));
+    setIsEditModalOpen(false);
+    showToast(`✓ Node "${editNodeTitle}" updated successfully!`);
+  };
+
+  const handleDeleteNode = () => {
+    if (!selectedNodeForEdit) return;
+    if (selectedNodeForEdit.id === 'strategy-root') {
+      showToast('❌ Cannot delete the root Project Strategy node.');
+      return;
     }
+    setNodes(prev => prev.filter(n => n.id !== selectedNodeForEdit.id));
+    setConnections(prev => prev.filter(c => c.from !== selectedNodeForEdit.id && c.to !== selectedNodeForEdit.id));
+    setIsEditModalOpen(false);
+    showToast(`✓ Node "${selectedNodeForEdit.title}" deleted.`);
+  };
+
+  // Find node coordinates helper
+  const getNodeCoords = (id) => {
+    const node = nodes.find(n => n.id === id);
+    if (!node) return { x: 0, y: 0, w: 0, h: 0 };
+    return node;
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: 'var(--lp-void)', overflow: 'hidden' }}>
-
-      {/* ── MAIN AREA ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-
-        {/* Top bar */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 24px', height: '64px', flexShrink: 0,
-          borderBottom: '1px solid var(--lp-border)',
-          background: 'var(--lp-surface)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button onClick={() => navigate('/')} style={{
-              color: 'var(--lp-muted)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer',
-              padding: '6px 10px', borderRadius: '8px', transition: 'all 0.2s',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--lp-surface-2)'; e.currentTarget.style.color = 'var(--lp-text)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--lp-muted)'; }}
-            >← Home</button>
-            <span style={{ color: 'var(--lp-border)', fontSize: '1rem' }}>|</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2BDFB0', animation: 'pulse-glow 2s infinite' }} />
-              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--lp-text)' }}>New Session</span>
-            </div>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
+      height: '100vh',
+      background: '#FAFAFA',
+      fontFamily: "'Inter', sans-serif",
+      overflow: 'hidden'
+    }}>
+      {/* ── TOP HEADER (BREADCRUMB + ACTION BAR) ── */}
+      <header style={{
+        height: '80px',
+        borderBottom: '1px solid #ECEFF2',
+        background: '#FFFFFF',
+        padding: '0 32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexShrink: 0
+      }}>
+        {/* Left: Breadcrumbs */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#94A3B8', letterSpacing: '0.02em' }}>
+            Project Strategy &rsaquo; Q4 Product Launch
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {showStrategy && (
-              <button
-                id="view-calendar"
-                onClick={() => navigate('/calendar')}
-                style={{
-                  padding: '8px 16px', background: 'rgba(43,223,176,0.12)', border: '1px solid rgba(43,223,176,0.3)',
-                  borderRadius: '999px', color: '#2BDFB0', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                }}
-              >◈ View in Calendar</button>
-            )}
-          </div>
+          <h1 style={{
+            fontSize: '1.45rem',
+            fontWeight: 800,
+            color: '#0F172A',
+            letterSpacing: '-0.02em',
+            margin: 0
+          }}>
+            Q4 Product Launch Strategy
+          </h1>
         </div>
 
-        {/* Content split */}
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* Right: Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            style={{
+              background: '#4F46E5',
+              color: '#FFFFFF',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              padding: '10px 18px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(79, 70, 229, 0.18)',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#4338CA'}
+            onMouseLeave={e => e.currentTarget.style.background = '#4F46E5'}
+          >
+            + Add Node
+          </button>
+          
+          <button
+            onClick={() => showToast('Connection mode active: Click parent then child node to connect.')}
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              color: '#475569',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              padding: '10px 18px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+            onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
+          >
+            Connect
+          </button>
 
-          {/* Chat area */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              showToast('🔗 Strategy share link copied to clipboard!');
+            }}
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              color: '#475569',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              padding: '10px 18px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+            onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
+          >
+            Share
+          </button>
 
-            {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <button
+            onClick={() => showToast('✓ Strategy saved successfully!')}
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              color: '#475569',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              padding: '10px 18px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+            onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
+          >
+            Save
+          </button>
+        </div>
+      </header>
 
-              {/* Mode visual indicator (audio) */}
-              {activeMode === 'audio' && (
-                <div style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  padding: '48px 0', gap: '24px',
-                }}>
-                  <MorphBlob
-                    isActive={voiceState !== VOICE_STATES.IDLE}
-                    isListening={voiceState === VOICE_STATES.LISTENING}
-                    isSpeaking={voiceState === VOICE_STATES.SPEAKING}
-                    color="#3B9EFF"
-                  />
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{
-                      fontFamily: 'Syne, sans-serif', fontSize: '1.2rem', fontWeight: 700, color: 'var(--lp-text)', marginBottom: '8px',
-                    }}>
-                      {voiceState === VOICE_STATES.IDLE && 'Tap to speak'}
-                      {voiceState === VOICE_STATES.LISTENING && 'Listening...'}
-                      {voiceState === VOICE_STATES.PROCESSING && 'Thinking...'}
-                      {voiceState === VOICE_STATES.SPEAKING && 'Responding...'}
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--lp-muted)' }}>
-                      {voiceState === VOICE_STATES.IDLE ? 'Describe your idea out loud' : 'Voice interaction active'}
-                    </div>
-                  </div>
-                  <button
-                    id="voice-toggle-btn"
-                    onClick={handleVoiceToggle}
-                    style={{
-                      width: '72px', height: '72px', borderRadius: '50%',
-                      background: voiceState !== VOICE_STATES.IDLE
-                        ? 'rgba(255,59,59,0.2)' : 'rgba(59,158,255,0.15)',
-                      border: `2px solid ${voiceState !== VOICE_STATES.IDLE ? '#FF3B3B' : '#3B9EFF'}`,
-                      color: voiceState !== VOICE_STATES.IDLE ? '#FF3B3B' : '#3B9EFF',
-                      fontSize: '1.8rem', cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      boxShadow: voiceState !== VOICE_STATES.IDLE ? '0 0 30px rgba(255,59,59,0.3)' : '0 0 20px rgba(59,158,255,0.2)',
-                    }}
-                  >
-                    {voiceState === VOICE_STATES.IDLE ? '◎' : '◼'}
-                  </button>
-                </div>
-              )}
+      {/* ── CANVAS WORKSPACE ── */}
+      <div style={{
+        flex: 1,
+        overflow: 'auto',
+        position: 'relative',
+        padding: '60px 40px'
+      }}>
+        {/* Internal scrollable canvas map wrapper */}
+        <div style={{ position: 'relative', width: '1350px', height: '620px' }}>
+          
+          {/* Connection Lines (SVG Overlay) */}
+          <svg style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+            zIndex: 1
+          }}>
+            {connections.map((conn, idx) => {
+              const from = getNodeCoords(conn.from);
+              const to = getNodeCoords(conn.to);
+              
+              const fx = from.x + from.w;
+              const fy = from.y + from.h / 2;
+              const tx = to.x;
+              const ty = to.y + to.h / 2;
+              const mx = (fx + tx) / 2;
+              
+              return (
+                <path
+                  key={`line-${idx}`}
+                  d={`M ${fx} ${fy} C ${mx} ${fy}, ${mx} ${ty}, ${tx} ${ty}`}
+                  fill="none"
+                  stroke={conn.color || '#CBD5E1'}
+                  strokeWidth="2"
+                  strokeDasharray="5,5"
+                  style={{ transition: 'all 0.3s ease' }}
+                />
+              );
+            })}
+          </svg>
 
-              {/* Image drop zone */}
-              {activeMode === 'image' && !uploadedImage && (
-                <div
-                  onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
-                  onDragLeave={() => setIsDragOver(false)}
-                  onDrop={handleFileDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{
-                    border: `2px dashed ${isDragOver ? '#2BDFB0' : 'var(--lp-border)'}`,
-                    borderRadius: '20px', padding: '48px', textAlign: 'center',
-                    background: isDragOver ? 'rgba(43,223,176,0.05)' : 'transparent',
-                    transition: 'all 0.2s ease', cursor: 'pointer',
-                    marginBottom: '12px',
-                  }}
-                >
-                  <div style={{ fontSize: '3rem', marginBottom: '16px' }}>◈</div>
-                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, color: 'var(--lp-text)', marginBottom: '8px' }}>
-                    Drop your sketch or image here
-                  </div>
-                  <div style={{ color: 'var(--lp-muted)', fontSize: '0.85rem' }}>
-                    PNG, JPG, or wireframe — AI will extract your idea
-                  </div>
-                  <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileDrop} />
-                </div>
-              )}
-
-              {uploadedImage && (
-                <div style={{ position: 'relative', display: 'inline-block' }}>
-                  <img src={uploadedImage} alt="Uploaded" style={{ maxWidth: '300px', borderRadius: '16px', border: '1px solid var(--lp-border)' }} />
-                  <button onClick={() => setUploadedImage(null)} style={{
-                    position: 'absolute', top: '8px', right: '8px', width: '28px', height: '28px',
-                    borderRadius: '50%', background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: '14px',
-                  }}>×</button>
-                </div>
-              )}
-
-              {/* Messages */}
-              {(activeMode === 'text' || messages.length > 1) && messages.map(msg => (
-                <div key={msg.id} style={{
-                  display: 'flex',
-                  flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-                  gap: '12px', alignItems: 'flex-start',
-                  animation: 'fade-up 0.4s ease',
-                }}>
-                  {msg.role === 'ai' && (
-                    <div style={{
-                      width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
-                      background: 'linear-gradient(135deg, #7C5CFC, #2BDFB0)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px',
-                    }}>✦</div>
-                  )}
-                  <div style={{ maxWidth: '75%' }}>
-                    <div style={{
-                      padding: '14px 18px',
-                      background: msg.role === 'user' ? 'rgba(124,92,252,0.15)' : 'var(--lp-surface-2)',
-                      border: `1px solid ${msg.role === 'user' ? 'rgba(124,92,252,0.3)' : 'var(--lp-border)'}`,
-                      borderRadius: msg.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-                      color: 'var(--lp-text)', fontSize: '0.9rem', lineHeight: 1.6,
-                    }}>
-                      {msg.text}
-                    </div>
-                    {msg.strategy && (
-                      <div style={{
-                        marginTop: '16px', padding: '20px',
-                        background: 'var(--lp-surface-2)', border: '1px solid var(--lp-border)',
-                        borderRadius: '16px',
-                      }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--lp-accent)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px' }}>
-                          ✦ Generated Strategy
-                        </div>
-                        <FlowChart animated={true} />
-                      </div>
-                    )}
-                    <div style={{ fontSize: '0.7rem', color: 'var(--lp-muted)', marginTop: '6px', textAlign: msg.role === 'user' ? 'right' : 'left' }}>
-                      {msg.ts}
-                    </div>
-                  </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input bar */}
-            <div style={{
-              padding: '16px 24px 24px',
-              background: 'var(--lp-surface)',
-              borderTop: '1px solid var(--lp-border)',
-            }}>
-              {/* Mode pills */}
-              <div style={{
-                display: 'flex', gap: '6px', marginBottom: '12px',
-                padding: '4px', background: 'var(--lp-surface-2)',
-                border: '1px solid var(--lp-border)', borderRadius: '999px',
-                width: 'fit-content',
-              }}>
-                {MODES.map(mode => (
-                  <button
-                    key={mode.id}
-                    id={`mode-${mode.id}`}
-                    onClick={() => setActiveMode(mode.id)}
-                    style={{
-                      padding: '7px 16px', borderRadius: '999px',
-                      background: activeMode === mode.id ? `${mode.color}20` : 'transparent',
-                      border: `1px solid ${activeMode === mode.id ? mode.color + '50' : 'transparent'}`,
-                      color: activeMode === mode.id ? mode.color : 'var(--lp-muted)',
-                      fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-                      transition: 'all 0.25s ease',
-                      display: 'flex', alignItems: 'center', gap: '5px',
-                    }}
-                  >
-                    <span>{mode.icon}</span> {mode.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Text input */}
-              {activeMode === 'text' && (
-                <div style={{
-                  display: 'flex', gap: '10px', alignItems: 'flex-end',
-                  background: 'var(--lp-surface-2)',
-                  border: `1px solid ${inputText ? currentMode.color + '50' : 'var(--lp-border)'}`,
-                  borderRadius: '20px', padding: '12px 12px 12px 20px',
-                  transition: 'border-color 0.2s ease',
-                  boxShadow: inputText ? `0 0 20px ${currentMode.glow}` : 'none',
-                }}>
-                  <textarea
-                    id="workspace-text-input"
-                    value={inputText}
-                    onChange={e => setInputText(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(inputText); }}}
-                    placeholder="Describe your idea, project, or goal..."
-                    rows={1}
-                    style={{
-                      flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                      color: 'var(--lp-text)', fontSize: '0.95rem', resize: 'none',
-                      fontFamily: 'Inter, sans-serif', lineHeight: 1.5,
-                      maxHeight: '150px', overflowY: 'auto',
-                    }}
-                    onInput={e => {
-                      e.target.style.height = 'auto';
-                      e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
-                    }}
-                  />
-                  <button
-                    id="workspace-send-btn"
-                    onClick={() => sendMessage(inputText)}
-                    disabled={!inputText.trim()}
-                    style={{
-                      width: '40px', height: '40px', borderRadius: '12px', flexShrink: 0,
-                      background: inputText.trim() ? 'var(--lp-accent)' : 'var(--lp-surface-3)',
-                      color: 'white', fontSize: '1rem', cursor: inputText.trim() ? 'pointer' : 'default',
-                      transition: 'all 0.2s ease',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}
-                  >→</button>
-                </div>
-              )}
-
-              {activeMode === 'image' && (
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    style={{
-                      flex: 1, padding: '14px', background: 'var(--lp-surface-2)',
-                      border: '1px solid var(--lp-border)', borderRadius: '16px',
-                      color: 'var(--lp-muted)', fontSize: '0.9rem', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', gap: '10px',
-                    }}
-                  >
-                    <span style={{ color: '#2BDFB0' }}>◈</span>
-                    {uploadedImage ? 'Image uploaded — describe what to do with it' : 'Click to upload image or sketch'}
-                  </button>
-                  {uploadedImage && (
-                    <button
-                      onClick={() => sendMessage('Analyze this image and create a strategy')}
-                      className="btn-primary"
-                      style={{ flexShrink: 0, padding: '14px 24px' }}
-                    >Analyze →</button>
-                  )}
-                  <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileDrop} />
-                </div>
-              )}
-
-              {activeMode === 'video' && (
-                <div style={{
-                  display: 'flex', gap: '10px', alignItems: 'center',
-                  padding: '16px 20px',
-                  background: 'var(--lp-surface-2)', border: '1px solid rgba(255,107,157,0.2)',
-                  borderRadius: '16px',
-                }}>
-                  <span style={{ fontSize: '1.5rem' }}>⬡</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--lp-text)', marginBottom: '2px' }}>Video Mode</div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--lp-muted)' }}>Record or upload a video explaining your idea</div>
-                  </div>
-                  <button className="btn-primary" style={{ background: '#FF6B9D', padding: '10px 20px', fontSize: '0.85rem', flexShrink: 0 }}>
-                    ⏺ Record
-                  </button>
-                </div>
-              )}
-
-              {activeMode === 'audio' && (
-                <div style={{ textAlign: 'center', color: 'var(--lp-muted)', fontSize: '0.85rem', padding: '8px 0' }}>
-                  Use the microphone above to record your idea
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right panel — Strategy summary */}
-          {showStrategy && (
-            <div style={{
-              width: '300px', flexShrink: 0,
-              borderLeft: '1px solid var(--lp-border)',
-              background: 'var(--lp-surface)',
-              padding: '20px', overflowY: 'auto',
-              animation: 'slide-in-right 0.4s ease',
-            }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--lp-accent)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '16px' }}>
-                ✦ Strategy Summary
-              </div>
-              {[
-                { icon: '🔬', label: 'Market Research', time: '1 week', color: '#3B9EFF' },
-                { icon: '🗺️', label: 'Define Strategy', time: '3 days', color: '#7C5CFC' },
-                { icon: '⚡', label: 'Build MVP', time: '4 weeks', color: '#2BDFB0' },
-                { icon: '👥', label: 'User Testing', time: '1 week', color: '#FFB547' },
-                { icon: '🚀', label: 'Launch', time: '1 week', color: '#FF6B9D' },
-              ].map((item, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: '12px',
-                  padding: '12px', borderRadius: '12px',
-                  background: 'var(--lp-surface-2)', border: '1px solid var(--lp-border)',
-                  marginBottom: '8px',
-                  animation: `fade-up 0.4s ease ${i * 0.08}s both`,
-                }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${item.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}>{item.icon}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--lp-text)' }}>{item.label}</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--lp-muted)' }}>{item.time}</div>
-                  </div>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.color, flexShrink: 0 }} />
-                </div>
-              ))}
-              <button
-                onClick={() => navigate('/calendar')}
+          {/* Interactive Mindmap Nodes */}
+          {nodes.map((node) => {
+            const isRoot = node.type === 'root';
+            
+            return (
+              <div
+                key={node.id}
+                onClick={() => handleEditNodeClick(node)}
                 style={{
-                  width: '100%', marginTop: '12px', padding: '12px',
-                  background: 'rgba(43,223,176,0.1)', border: '1px solid rgba(43,223,176,0.25)',
-                  borderRadius: '12px', color: '#2BDFB0', fontSize: '0.85rem', fontWeight: 600,
-                  cursor: 'pointer', transition: 'all 0.2s ease',
+                  position: 'absolute',
+                  left: `${node.x}px`,
+                  top: `${node.y}px`,
+                  width: `${node.w}px`,
+                  minHeight: `${node.h}px`,
+                  background: isRoot ? 'linear-gradient(135deg, #4F46E5, #6366F1)' : node.bgColor,
+                  border: isRoot ? 'none' : `1.5px solid ${node.borderColor || '#E2E8F0'}`,
+                  borderRadius: '16px',
+                  boxShadow: isRoot 
+                    ? '0 10px 30px rgba(79, 70, 229, 0.3)' 
+                    : '0 4px 12px rgba(0, 0, 0, 0.02)',
+                  padding: isRoot ? '14px 20px' : '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  zIndex: 2,
+                  transition: 'transform 0.2s, box-shadow 0.2s'
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(43,223,176,0.18)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(43,223,176,0.1)'}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = isRoot 
+                    ? '0 12px 35px rgba(79, 70, 229, 0.4)' 
+                    : '0 8px 20px rgba(0, 0, 0, 0.06)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = isRoot 
+                    ? '0 10px 30px rgba(79, 70, 229, 0.3)' 
+                    : '0 4px 12px rgba(0, 0, 0, 0.02)';
+                }}
               >
-                Open in Calendar →
-              </button>
-            </div>
-          )}
+                {isRoot ? (
+                  /* Root Node Layout */
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '20px' }}>🎯</span>
+                    <span style={{
+                      color: '#FFFFFF',
+                      fontSize: '0.98rem',
+                      fontWeight: 800,
+                      letterSpacing: '-0.01em'
+                    }}>
+                      {node.title}
+                    </span>
+                  </div>
+                ) : (
+                  /* Detail Node Layout */
+                  <div>
+                    {/* Header: Bullet indicator + Title */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                      <span style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: node.color,
+                        display: 'inline-block'
+                      }} />
+                      <h3 style={{
+                        fontSize: '0.94rem',
+                        fontWeight: 800,
+                        color: '#0F172A',
+                        margin: 0
+                      }}>
+                        {node.title}
+                      </h3>
+                    </div>
+
+                    {/* Bullet Points */}
+                    <ul style={{
+                      listStyle: 'none',
+                      padding: 0,
+                      margin: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}>
+                      {node.bullets.map((bullet, bIdx) => (
+                        <li key={bIdx} style={{
+                          fontSize: '0.82rem',
+                          color: '#475569',
+                          fontWeight: 500,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}>
+                          <span style={{ color: node.color, fontSize: '10px' }}>&bull;</span>
+                          {bullet}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
         </div>
       </div>
+
+      {/* ── TOAST NOTIFICATION ── */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed',
+          bottom: '30px',
+          right: '30px',
+          background: '#0F172A',
+          color: '#FFFFFF',
+          padding: '12px 24px',
+          borderRadius: '10px',
+          fontSize: '0.88rem',
+          fontWeight: 600,
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
+          animation: 'fadeInUp 0.3s ease',
+          zIndex: 10000
+        }}>
+          {toastMessage}
+        </div>
+      )}
+
+      {/* ── MODAL: ADD NODE ── */}
+      {isAddModalOpen && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          background: 'rgba(15, 23, 42, 0.35)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <form
+            onSubmit={handleAddNodeSubmit}
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #ECEFF2',
+              borderRadius: '16px',
+              padding: '28px',
+              width: '100%',
+              maxWidth: '440px',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.08)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}
+          >
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>Add Strategy Node</h2>
+            
+            {/* Category Select */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', marginBottom: '6px' }}>Category Theme</label>
+              <select
+                value={newNodeCategory}
+                onChange={e => setNewNodeCategory(e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none' }}
+              >
+                <option value="research">Green (Research)</option>
+                <option value="planning">Blue (Planning)</option>
+                <option value="development">Yellow (Development)</option>
+                <option value="growth">Purple (Growth)</option>
+              </select>
+            </div>
+
+            {/* Parent Node Select */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', marginBottom: '6px' }}>Connect Parent</label>
+              <select
+                value={newNodeParent}
+                onChange={e => setNewNodeParent(e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none' }}
+              >
+                {nodes.map(n => (
+                  <option key={n.id} value={n.id}>{n.title}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Title Input */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', marginBottom: '6px' }}>Node Title</label>
+              <input
+                type="text"
+                value={newNodeTitle}
+                onChange={e => setNewNodeTitle(e.target.value)}
+                placeholder="e.g. User Testing"
+                required
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none' }}
+              />
+            </div>
+
+            {/* Bullets input */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', marginBottom: '6px' }}>Bullet Points (One per line)</label>
+              <textarea
+                value={newNodeBullets}
+                onChange={e => setNewNodeBullets(e.target.value)}
+                placeholder="Item 1&#10;Item 2&#10;Item 3"
+                rows={3}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none', resize: 'none', fontFamily: 'inherit' }}
+              />
+            </div>
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #E2E8F0', background: 'transparent', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: '#64748B' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', background: '#4F46E5', color: '#FFFFFF', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700 }}
+              >
+                Add Node
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* ── MODAL: EDIT NODE ── */}
+      {isEditModalOpen && selectedNodeForEdit && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          background: 'rgba(15, 23, 42, 0.35)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <form
+            onSubmit={handleEditNodeSubmit}
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #ECEFF2',
+              borderRadius: '16px',
+              padding: '28px',
+              width: '100%',
+              maxWidth: '440px',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.08)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}
+          >
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>Edit Strategy Node</h2>
+            
+            {/* Title */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', marginBottom: '6px' }}>Node Title</label>
+              <input
+                type="text"
+                value={editNodeTitle}
+                disabled={selectedNodeForEdit.type === 'root'}
+                onChange={e => setEditNodeTitle(e.target.value)}
+                required
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none', background: selectedNodeForEdit.type === 'root' ? '#F8FAFC' : 'transparent' }}
+              />
+            </div>
+
+            {/* Bullets */}
+            {selectedNodeForEdit.type !== 'root' && (
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', marginBottom: '6px' }}>Bullet Points (One per line)</label>
+                <textarea
+                  value={editNodeBullets}
+                  onChange={e => setEditNodeBullets(e.target.value)}
+                  rows={4}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none', resize: 'none', fontFamily: 'inherit' }}
+                />
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', marginTop: '8px' }}>
+              {selectedNodeForEdit.type !== 'root' ? (
+                <button
+                  type="button"
+                  onClick={handleDeleteNode}
+                  style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #FECACA', background: '#FEF2F2', color: '#EF4444', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
+                >
+                  Delete
+                </button>
+              ) : <div />}
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #E2E8F0', background: 'transparent', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: '#64748B' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', background: '#4F46E5', color: '#FFFFFF', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700 }}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

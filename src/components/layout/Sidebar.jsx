@@ -1,211 +1,251 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import ThemeToggle from '../ui/ThemeToggle';
-
-const Logo = () => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-    <div style={{
-      width: '32px', height: '32px',
-      background: 'linear-gradient(135deg, #7C5CFC, #2BDFB0)',
-      borderRadius: '10px',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: '16px',
-      boxShadow: '0 4px 16px rgba(124,92,252,0.4)',
-    }}>🚀</div>
-    <span style={{
-      fontFamily: 'Syne, sans-serif',
-      fontWeight: 800,
-      fontSize: '1.15rem',
-      background: 'linear-gradient(135deg, #7C5CFC, #2BDFB0)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text',
-    }}>LaunchPad</span>
-  </div>
-);
-
-const navItems = [
-  { path: '/workspace', icon: '✦', label: 'Workspace', color: '#7C5CFC' },
-  { path: '/calendar', icon: '◈', label: 'Calendar', color: '#3B9EFF' },
-];
-
-const recentProjects = [
-  { label: 'E-Commerce App', time: '2h ago' },
-  { label: 'SaaS Landing Page', time: 'Yesterday' },
-  { label: 'Mobile App MVP', time: '3d ago' },
-];
 
 const Sidebar = ({ collapsed, onCollapse }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Highlight Strategy if on workspace, Calendar if on calendar
+  const getActiveTab = () => {
+    if (location.pathname === '/calendar') return 'calendar';
+    if (location.pathname === '/workspace') return 'strategy';
+    return 'strategy'; // Default/active fallback
+  };
+
+  const activeTab = getActiveTab();
+
+  const menuItems = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      path: '/workspace',
+      icon: (color) => (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+        </svg>
+      )
+    },
+    {
+      id: 'projects',
+      label: 'Projects',
+      path: '/workspace',
+      icon: (color) => (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+      )
+    },
+    {
+      id: 'strategy',
+      label: 'Strategy',
+      path: '/workspace',
+      icon: (color) => (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+        </svg>
+      )
+    },
+    {
+      id: 'calendar',
+      label: 'Calendar',
+      path: '/calendar',
+      icon: (color) => (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+      )
+    },
+    {
+      id: 'teams',
+      label: 'Teams',
+      path: '/workspace',
+      icon: (color) => (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      )
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics',
+      path: '/workspace',
+      icon: (color) => (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+      )
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      path: '/workspace',
+      icon: (color) => (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+      )
+    }
+  ];
+
   return (
-    <div
-      id="app-sidebar"
-      style={{
-        width: collapsed ? '64px' : '240px',
-        height: '100vh',
-        background: 'var(--lp-surface)',
-        borderRight: '1px solid var(--lp-border)',
+    <div style={{
+      width: collapsed ? '72px' : '260px',
+      height: '100vh',
+      background: '#FFFFFF',
+      borderRight: '1px solid #ECEFF2',
+      display: 'flex',
+      flexDirection: 'column',
+      flexShrink: 0,
+      transition: 'width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+      overflow: 'hidden',
+      fontFamily: "'Inter', sans-serif"
+    }}>
+      {/* Sidebar Header: Logo with Rocket Icon */}
+      <div style={{
+        padding: '24px 20px',
         display: 'flex',
-        flexDirection: 'column',
-        transition: 'width 0.3s cubic-bezier(0.25,0.46,0.45,0.94)',
-        flexShrink: 0,
-        overflow: 'hidden',
-        position: 'relative',
-        zIndex: 10,
-      }}
-    >
-      {/* Header */}
-      <div style={{ padding: '20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--lp-border)', minHeight: '64px' }}>
-        {!collapsed && <Logo />}
-        {collapsed && (
-          <div style={{
-            width: '32px', height: '32px',
-            background: 'linear-gradient(135deg, #7C5CFC, #2BDFB0)',
-            borderRadius: '10px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '16px', margin: '0 auto',
-          }}>🚀</div>
-        )}
+        alignItems: 'center',
+        gap: '12px',
+        minHeight: '80px',
+        borderBottom: '1px solid #FAFBFB',
+        cursor: 'pointer'
+      }} onClick={() => navigate('/')}>
+        {/* Rocket Icon in solid Indigo rounded box */}
+        <div style={{
+          width: '36px',
+          height: '36px',
+          borderRadius: '10px',
+          background: 'linear-gradient(135deg, #4F46E5, #6366F1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)'
+        }}>
+          <span style={{ fontSize: '18px' }}>🚀</span>
+        </div>
+        
         {!collapsed && (
-          <button
-            onClick={onCollapse}
-            style={{ color: 'var(--lp-muted)', padding: '4px', borderRadius: '6px', transition: 'color 0.2s' }}
-            onMouseEnter={e => e.currentTarget.style.color = 'var(--lp-text)'}
-            onMouseLeave={e => e.currentTarget.style.color = 'var(--lp-muted)'}
-          >
-            ◀
-          </button>
-        )}
-        {collapsed && (
-          <button
-            onClick={onCollapse}
-            style={{
-              position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
-              color: 'var(--lp-muted)', padding: '4px', borderRadius: '6px',
-              fontSize: '10px',
-            }}
-          >▶</button>
+          <span style={{
+            fontSize: '1.2rem',
+            fontWeight: 800,
+            color: '#0F172A',
+            letterSpacing: '-0.03em'
+          }}>
+            LaunchPad
+          </span>
         )}
       </div>
 
-      {/* New Project */}
-      {!collapsed && (
-        <div style={{ padding: '12px 16px' }}>
-          <button
-            id="sidebar-new-project"
-            onClick={() => navigate('/workspace')}
-            style={{
-              width: '100%', padding: '10px 14px',
-              background: 'linear-gradient(135deg, rgba(124,92,252,0.2), rgba(43,223,176,0.1))',
-              border: '1px solid rgba(124,92,252,0.3)',
-              borderRadius: '12px', color: 'var(--lp-accent)',
-              fontSize: '0.85rem', fontWeight: 600,
-              display: 'flex', alignItems: 'center', gap: '8px',
-              transition: 'all 0.2s ease', cursor: 'pointer',
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124,92,252,0.3), rgba(43,223,176,0.15))'}
-            onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124,92,252,0.2), rgba(43,223,176,0.1))'}
-          >
-            <span>+</span> New Project
-          </button>
-        </div>
-      )}
-
-      {/* Nav */}
-      <nav style={{ padding: '8px 8px', flex: 1, overflow: 'hidden auto' }}>
-        {!collapsed && (
-          <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', color: 'var(--lp-muted)', textTransform: 'uppercase', padding: '8px 8px 6px' }}>
-            Navigation
-          </div>
-        )}
-        {navItems.map(item => {
-          const isActive = location.pathname === item.path;
+      {/* Menu Navigation Items */}
+      <nav style={{
+        flex: 1,
+        padding: '24px 14px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '4px',
+        overflowY: 'auto'
+      }}>
+        {menuItems.map((item) => {
+          const isActive = activeTab === item.id;
+          const iconColor = isActive ? '#4F46E5' : '#64748B';
+          const textColor = isActive ? '#4F46E5' : '#475569';
+          
           return (
             <button
-              key={item.path}
-              id={`sidebar-nav-${item.label.toLowerCase()}`}
+              key={item.id}
               onClick={() => navigate(item.path)}
               style={{
                 width: '100%',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
-                padding: '10px 8px',
+                gap: '12px',
+                padding: '12px 14px',
                 borderRadius: '10px',
-                marginBottom: '2px',
-                background: isActive ? `${item.color}15` : 'transparent',
-                border: isActive ? `1px solid ${item.color}30` : '1px solid transparent',
-                color: isActive ? item.color : 'var(--lp-text-2)',
-                fontSize: '0.875rem',
-                fontWeight: isActive ? 600 : 400,
+                background: isActive ? 'rgba(79, 70, 229, 0.07)' : 'transparent',
+                color: textColor,
+                fontSize: '0.92rem',
+                fontWeight: isActive ? 700 : 500,
+                textAlign: 'left',
+                border: 'none',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                justifyContent: collapsed ? 'center' : 'flex-start',
+                justifyContent: collapsed ? 'center' : 'flex-start'
               }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--lp-surface-2)'; e.currentTarget.style.color = 'var(--lp-text)'; }}}
-              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--lp-text-2)'; }}}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = '#F8FAFC';
+                  e.currentTarget.style.color = '#0F172A';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = textColor;
+                }
+              }}
               title={collapsed ? item.label : ''}
             >
-              <span style={{ fontSize: '1rem', flexShrink: 0 }}>{item.icon}</span>
+              {item.icon(iconColor)}
               {!collapsed && <span>{item.label}</span>}
             </button>
           );
         })}
-
-        {/* Recent */}
-        {!collapsed && (
-          <>
-            <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', color: 'var(--lp-muted)', textTransform: 'uppercase', padding: '16px 8px 6px' }}>
-              Recent Projects
-            </div>
-            {recentProjects.map((p, i) => (
-              <button
-                key={i}
-                style={{
-                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '8px 8px', borderRadius: '8px', marginBottom: '2px',
-                  background: 'transparent', color: 'var(--lp-text-2)', fontSize: '0.8rem',
-                  cursor: 'pointer', transition: 'all 0.2s ease',
-                  border: '1px solid transparent',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--lp-surface-2)'; e.currentTarget.style.color = 'var(--lp-text)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--lp-text-2)'; }}
-              >
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>{p.label}</span>
-                <span style={{ fontSize: '0.7rem', color: 'var(--lp-muted)', flexShrink: 0, marginLeft: '8px' }}>{p.time}</span>
-              </button>
-            ))}
-          </>
-        )}
       </nav>
 
-      {/* Footer */}
-      <div style={{ padding: '12px', borderTop: '1px solid var(--lp-border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {!collapsed && <ThemeToggle />}
-        {collapsed && (
-          <button
-            onClick={() => {}}
-            style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--lp-surface-2)', border: '1px solid var(--lp-border)', color: 'var(--lp-text-2)', fontSize: '1rem', margin: '0 auto' }}
-          >☀</button>
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: collapsed ? '0' : '4px' }}>
+      {/* Sidebar Footer: MY PROJECT Info Box */}
+      {!collapsed && (
+        <div style={{
+          padding: '20px',
+          borderTop: '1px solid #F1F5F9'
+        }}>
           <div style={{
-            width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
-            background: 'linear-gradient(135deg, #7C5CFC, #FF6B9D)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '14px', color: 'white', fontWeight: 700,
-            margin: collapsed ? '0 auto' : '0',
-          }}>A</div>
-          {!collapsed && (
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--lp-text)' }}>Alex</div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--lp-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>alex@launchpad.ai</div>
-            </div>
-          )}
+            background: '#F8FAFC',
+            border: '1px solid #ECEFF2',
+            borderRadius: '12px',
+            padding: '14px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px'
+          }}>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: '#94A3B8',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase'
+            }}>
+              My Project
+            </span>
+            <span style={{
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              color: '#1E293B'
+            }}>
+              Q4 Product Launch
+            </span>
+            <span style={{
+              fontSize: '0.74rem',
+              color: '#64748B',
+              fontWeight: 500
+            }}>
+              LaunchPad workspace
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
