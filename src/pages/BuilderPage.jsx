@@ -311,11 +311,33 @@ const BuilderPage = () => {
         <div style={{
           padding: '16px 20px',
           borderTop: `1px solid ${theme.sidebarBorder}`,
-          fontSize: '0.72rem',
-          color: theme.mutedText,
-          textAlign: 'center'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
         }}>
-          LaunchPad Engine v1.0
+          <span style={{ fontSize: '0.72rem', color: theme.mutedText }}>LaunchPad Engine v1.0</span>
+          <button
+            type="button"
+            onClick={() => setDarkMode(prev => !prev)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: theme.sidebarText,
+              fontSize: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '4px',
+              borderRadius: '6px',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = theme.cardBg}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
         </div>
       </aside>
 
@@ -400,59 +422,8 @@ const BuilderPage = () => {
             </div>
           </div>
 
-          {/* Right section: Dark Mode + Profile widget */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {/* Theme Toggle Button */}
-            <button
-              type="button"
-              onClick={() => setDarkMode(prev => !prev)}
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                border: `1px solid ${theme.sidebarBorder}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: theme.sidebarText,
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = theme.sidebarBorder}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-              {darkMode ? '☀️' : '🌙'}
-            </button>
-
-            {/* User profile widget */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '6px 12px',
-              borderRadius: '999px',
-              border: `1px solid ${theme.sidebarBorder}`,
-              background: theme.sidebarBg,
-              cursor: 'default'
-            }}>
-              <div style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                background: '#4F46E5',
-                color: 'white',
-                fontSize: '11px',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                GG
-              </div>
-              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: theme.sidebarText }}>Greg Gregor</span>
-            </div>
-          </div>
+          {/* Right section: Removed to reduce clutter */}
+          <div></div>
         </header>
 
         {/* Chat Logs Window */}
@@ -622,34 +593,6 @@ const BuilderPage = () => {
           borderTop: `1px solid ${theme.sidebarBorder}`,
           flexShrink: 0
         }}>
-          {/* Action Pills */}
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            marginBottom: '14px',
-            flexWrap: 'wrap'
-          }}>
-            {['Translate', 'Improve', 'Make longer', 'Make shorter'].map((pill) => (
-              <button 
-                key={pill}
-                onClick={() => setInputText(prev => prev ? `${prev} - ${pill.toLowerCase()}` : pill)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '20px',
-                  background: theme.chatBg,
-                  border: `1px solid ${theme.sidebarBorder}`,
-                  color: theme.sidebarText,
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'background 0.2s'
-                }}
-              >
-                {pill}
-              </button>
-            ))}
-          </div>
-
           {/* Interactive input box */}
           <form 
             onSubmit={handleSendMessage}
@@ -701,17 +644,6 @@ const BuilderPage = () => {
               &uarr;
             </button>
           </form>
-
-          {/* Cancel note */}
-          <div style={{
-            textAlign: 'right',
-            fontSize: '0.68rem',
-            color: theme.mutedText,
-            marginTop: '6px',
-            paddingRight: '6px'
-          }}>
-            ESC or Click to cancel
-          </div>
         </footer>
       </div>
     </div>
