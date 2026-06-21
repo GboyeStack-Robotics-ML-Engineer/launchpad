@@ -442,70 +442,7 @@ const RocketPreloader = ({ onComplete }) => {
       {/* 3D WebGL Canvas Mount */}
       <div ref={mountRef} style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
 
-      {/* Futuristic HUD Overlay */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '10%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 'min(90%, 500px)',
-          background: 'rgba(10, 10, 26, 0.65)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 90, 54, 0.2)',
-          borderRadius: '16px',
-          padding: '24px 32px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '12px',
-          color: '#ffffff',
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 90, 54, 0.05)',
-          zIndex: 2,
-        }}
-      >
-        {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <span style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.04em' }}>
-            LAUNCHPAD<span style={{ color: '#FF5A36' }}>.</span>
-          </span>
-          <span
-            style={{
-              fontSize: '8px',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              background: 'rgba(255, 90, 54, 0.2)',
-              color: '#FF5A36',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              letterSpacing: '0.05em',
-            }}
-          >
-            System Active
-          </span>
-        </div>
 
-        {/* Progress bar */}
-        <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '99px', overflow: 'hidden' }}>
-          <div
-            style={{
-              width: `${progress}%`,
-              height: '100%',
-              background: 'linear-gradient(90deg, #FF8008 0%, #FFC837 100%)',
-              boxShadow: '0 0 10px rgba(255, 128, 8, 0.8)',
-              transition: 'width 0.15s ease-out',
-            }}
-          />
-        </div>
-
-        {/* Progress labels */}
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.5)' }}>
-          <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: 'monospace' }}>{logText}</span>
-          <span style={{ color: '#FF5A36', fontFamily: 'monospace' }}>{progress}%</span>
-        </div>
-      </div>
     </div>
   );
 };

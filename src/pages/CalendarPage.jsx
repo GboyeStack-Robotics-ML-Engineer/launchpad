@@ -226,11 +226,18 @@ const CalendarPage = () => {
 
                 {(tasksData[selectedDay] || []).length > 0 ? (
                   (tasksData[selectedDay]).map((task, i) => (
-                    <div key={i} style={{
-                      padding: '14px', borderRadius: '14px',
-                      background: `${task.color}10`, border: `1px solid ${task.color}30`,
-                      marginBottom: '10px', animation: `fade-up 0.3s ease ${i * 0.08}s both`,
-                    }}>
+                    <div key={i} 
+                         onClick={() => navigate('/workspace', { state: { highlightTask: task.label } })}
+                         style={{
+                           padding: '14px', borderRadius: '14px',
+                           background: `${task.color}10`, border: `1px solid ${task.color}30`,
+                           marginBottom: '10px', animation: `fade-up 0.3s ease ${i * 0.08}s both`,
+                           cursor: 'pointer', transition: 'transform 0.2s'
+                         }}
+                         onMouseEnter={e => e.currentTarget.style.transform = 'translateX(4px)'}
+                         onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                         title={`View breakdown for ${task.label}`}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: task.color }} />
                         <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--lp-text)' }}>{task.label}</div>

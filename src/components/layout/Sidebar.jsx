@@ -112,41 +112,51 @@ const Sidebar = ({ collapsed, onCollapse }) => {
       overflow: 'hidden',
       fontFamily: "'Inter', sans-serif"
     }}>
-      {/* Sidebar Header: Logo with Rocket Icon */}
+      {/* Sidebar Header: Text Logo & Toggle */}
       <div style={{
         padding: '24px 20px',
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
         minHeight: '80px',
         borderBottom: '1px solid #FAFBFB',
-        cursor: 'pointer'
-      }} onClick={() => navigate('/')}>
-        {/* Rocket Icon in solid Indigo rounded box */}
-        <div style={{
-          width: '36px',
-          height: '36px',
-          borderRadius: '10px',
-          background: 'linear-gradient(135deg, #4F46E5, #6366F1)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)'
-        }}>
-          <span style={{ fontSize: '18px' }}>🚀</span>
-        </div>
-        
-        {!collapsed && (
+        justifyContent: collapsed ? 'center' : 'space-between',
+        flexDirection: collapsed ? 'column' : 'row',
+        gap: collapsed ? '12px' : '0'
+      }}>
+        <div onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <span style={{
-            fontSize: '1.2rem',
+            fontSize: collapsed ? '1.5rem' : '1.8rem',
             fontWeight: 800,
             color: '#0F172A',
-            letterSpacing: '-0.03em'
+            letterSpacing: '-0.04em',
+            userSelect: 'none'
           }}>
-            LaunchPad
+            {collapsed ? 'L' : 'LaunchPad'}
+            <span style={{ color: '#FF5A36' }}>.</span>
           </span>
-        )}
+        </div>
+
+        <button
+          onClick={onCollapse}
+          style={{
+            background: '#F1F5F9',
+            border: '1px solid #E2E8F0',
+            color: '#64748B',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '24px',
+            height: '24px',
+            borderRadius: '6px',
+            transition: 'background 0.2s'
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = '#E2E8F0'}
+          onMouseLeave={e => e.currentTarget.style.background = '#F1F5F9'}
+          title={collapsed ? "Expand" : "Collapse"}
+        >
+          <span style={{ fontSize: '10px' }}>{collapsed ? '▶' : '◀'}</span>
+        </button>
       </div>
 
       {/* Menu Navigation Items */}

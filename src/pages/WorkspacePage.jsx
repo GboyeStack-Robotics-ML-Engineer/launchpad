@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const initialNodes = [
   {
@@ -20,7 +20,7 @@ const initialNodes = [
     x: 350,
     y: 40,
     w: 240,
-    h: 160,
+    h: 110,
     color: '#10B981',
     bgColor: '#FFFFFF',
     borderColor: '#E6F4EA',
@@ -33,7 +33,7 @@ const initialNodes = [
     x: 350,
     y: 320,
     w: 240,
-    h: 180,
+    h: 110,
     color: '#3B82F6',
     bgColor: '#FFFFFF',
     borderColor: '#E8F0FE',
@@ -46,7 +46,7 @@ const initialNodes = [
     x: 670,
     y: 320,
     w: 240,
-    h: 180,
+    h: 110,
     color: '#F59E0B',
     bgColor: '#FFFFFF',
     borderColor: '#FEF7E0',
@@ -59,7 +59,7 @@ const initialNodes = [
     x: 990,
     y: 320,
     w: 240,
-    h: 180,
+    h: 110,
     color: '#8B5CF6',
     bgColor: '#FFFFFF',
     borderColor: '#F3E8FF',
@@ -76,6 +76,7 @@ const initialConnections = [
 
 const WorkspacePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Nodes and Connections State
   const [nodes, setNodes] = useState(initialNodes);
@@ -98,6 +99,73 @@ const WorkspacePage = () => {
   const [selectedNodeForEdit, setSelectedNodeForEdit] = useState(null);
   const [editNodeTitle, setEditNodeTitle] = useState('');
   const [editNodeBullets, setEditNodeBullets] = useState('');
+
+  // Zoom State
+  const [zoomLevel, setZoomLevel] = useState(1);
+
+  // Highlighting State
+  const [highlightedNodeId, setHighlightedNodeId] = useState(null);
+
+  // Sub-Milestones Modal State
+  const [subMilestonesNode, setSubMilestonesNode] = useState(null);
+
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    if (wrapperRef.current) {
+      // Dynamic fit scaling
+      const parentW = wrapperRef.current.parentElement.clientWidth;
+      const parentH = wrapperRef.current.parentElement.clientHeight;
+      const mapW = 1350;
+      const mapH = 620;
+      const scaleX = (parentW - 80) / mapW;
+      const scaleY = (parentH - 120) / mapH;
+      const fitScale = Math.min(scaleX, scaleY, 1);
+      setZoomLevel(fitScale);
+      
+      const handleWheel = (e) => {
+        // Prevent default browser zoom/scroll if zooming
+        if (e.ctrlKey || Math.abs(e.deltaY) > 0) {
+          e.preventDefault();
+          setZoomLevel(prev => {
+            const newZoom = prev - e.deltaY * 0.001;
+            return Math.min(Math.max(newZoom, 0.3), 3);
+          });
+        }
+      };
+      
+      const node = wrapperRef.current;
+      node.addEventListener('wheel', handleWheel, { passive: false });
+      return () => node.removeEventListener('wheel', handleWheel);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.highlightTask) {
+      const taskLabel = location.state.highlightTask.toLowerCase();
+      // Find the node that matches this task in title or bullets
+      const foundNode = nodes.find(n => 
+        n.title.toLowerCase().includes(taskLabel) || 
+        n.bullets.some(b => b.toLowerCase().includes(taskLabel))
+      );
+      if (foundNode) {
+        setHighlightedNodeId(foundNode.id);
+        setToastMessage(`Viewing breakdown for: ${location.state.highlightTask}`);
+        setTimeout(() => setToastMessage(''), 3000);
+        
+        // Clear the state so it doesn't re-trigger on reload unless intended
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state, nodes]);
+
+  const zoomBtnStyle = {
+    width: '44px', height: '44px', borderRadius: '12px',
+    background: '#FFFFFF', border: '1px solid #E2E8F0',
+    color: '#0F172A', fontSize: '1.4rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    cursor: 'pointer', boxShadow: '0 8px 16px rgba(0,0,0,0.06)', transition: 'all 0.2s ease',
+    outline: 'none'
+  };
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -314,14 +382,38 @@ const WorkspacePage = () => {
       </header>
 
       {/* ── CANVAS WORKSPACE ── */}
-      <div style={{
+      <div 
+        ref={wrapperRef}
+        style={{
         flex: 1,
         overflow: 'auto',
         position: 'relative',
         padding: '60px 40px'
       }}>
+        {/* Zoom Controls */}
+        <div style={{
+          position: 'fixed',
+          bottom: '40px',
+          right: '40px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          zIndex: 50
+        }}>
+          <button onClick={() => setZoomLevel(prev => Math.min(prev + 0.1, 2))} style={zoomBtnStyle}>+</button>
+          <button onClick={() => setZoomLevel(1)} style={{...zoomBtnStyle, fontSize: '0.65rem', fontWeight: 800}}>RESET</button>
+          <button onClick={() => setZoomLevel(prev => Math.max(prev - 0.1, 0.5))} style={zoomBtnStyle}>-</button>
+        </div>
+
         {/* Internal scrollable canvas map wrapper */}
-        <div style={{ position: 'relative', width: '1350px', height: '620px' }}>
+        <div style={{ 
+          position: 'relative', 
+          width: '1350px', 
+          height: '620px',
+          transform: `scale(${zoomLevel})`,
+          transformOrigin: 'top left',
+          transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'
+        }}>
           
           {/* Connection Lines (SVG Overlay) */}
           <svg style={{
@@ -364,7 +456,6 @@ const WorkspacePage = () => {
             return (
               <div
                 key={node.id}
-                onClick={() => handleEditNodeClick(node)}
                 style={{
                   position: 'absolute',
                   left: `${node.x}px`,
@@ -374,9 +465,11 @@ const WorkspacePage = () => {
                   background: isRoot ? 'linear-gradient(135deg, #4F46E5, #6366F1)' : node.bgColor,
                   border: isRoot ? 'none' : `1.5px solid ${node.borderColor || '#E2E8F0'}`,
                   borderRadius: '16px',
-                  boxShadow: isRoot 
-                    ? '0 10px 30px rgba(79, 70, 229, 0.3)' 
-                    : '0 4px 12px rgba(0, 0, 0, 0.02)',
+                  boxShadow: node.id === highlightedNodeId 
+                    ? `0 0 0 4px ${node.color}40, 0 10px 30px ${node.color}80`
+                    : isRoot 
+                      ? '0 10px 30px rgba(79, 70, 229, 0.3)' 
+                      : '0 4px 12px rgba(0, 0, 0, 0.02)',
                   padding: isRoot ? '14px 20px' : '20px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -413,49 +506,67 @@ const WorkspacePage = () => {
                   </div>
                 ) : (
                   /* Detail Node Layout */
-                  <div>
-                    {/* Header: Bullet indicator + Title */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                      <span style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: node.color,
-                        display: 'inline-block'
-                      }} />
-                      <h3 style={{
-                        fontSize: '0.94rem',
-                        fontWeight: 800,
-                        color: '#0F172A',
-                        margin: 0
-                      }}>
-                        {node.title}
-                      </h3>
+                  <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    {/* Header: Bullet indicator + Title + Edit */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          background: node.color,
+                          display: 'inline-block'
+                        }} />
+                        <h3 style={{
+                          fontSize: '0.94rem',
+                          fontWeight: 800,
+                          color: '#0F172A',
+                          margin: 0
+                        }}>
+                          {node.title}
+                        </h3>
+                      </div>
+                      
+                      {/* Edit Button */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleEditNodeClick(node); }}
+                        style={{
+                          background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer',
+                          padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#F1F5F9'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        title="Edit Node"
+                      >
+                        ✎
+                      </button>
                     </div>
 
-                    {/* Bullet Points */}
-                    <ul style={{
-                      listStyle: 'none',
-                      padding: 0,
-                      margin: 0,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px'
-                    }}>
-                      {node.bullets.map((bullet, bIdx) => (
-                        <li key={bIdx} style={{
-                          fontSize: '0.82rem',
-                          color: '#475569',
-                          fontWeight: 500,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}>
-                          <span style={{ color: node.color, fontSize: '10px' }}>&bull;</span>
-                          {bullet}
-                        </li>
-                      ))}
-                    </ul>
+                    {/* Expand Toggle Button */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSubMilestonesNode(node); }}
+                      style={{
+                        background: `${node.color}10`,
+                        border: `1px solid ${node.color}30`,
+                        color: node.color,
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        transition: 'all 0.2s',
+                        marginTop: 'auto'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = `${node.color}25`}
+                      onMouseLeave={e => e.currentTarget.style.background = `${node.color}10`}
+                    >
+                      <span>{node.bullets?.length || 0} Milestones</span>
+                      <span>{'▶'}</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -672,6 +783,77 @@ const WorkspacePage = () => {
               </div>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* ── MODAL: SUB-MILESTONES ── */}
+      {subMilestonesNode && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 10000,
+          background: 'rgba(15, 23, 42, 0.4)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          animation: 'fadeIn 0.2s ease'
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            border: `1px solid ${subMilestonesNode.color}40`,
+            borderTop: `4px solid ${subMilestonesNode.color}`,
+            borderRadius: '16px',
+            padding: '32px',
+            width: '100%',
+            maxWidth: '480px',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: subMilestonesNode.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Milestones
+                </span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0F172A', margin: '4px 0 0 0' }}>{subMilestonesNode.title}</h2>
+              </div>
+              <button
+                onClick={() => setSubMilestonesNode(null)}
+                style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748B' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {subMilestonesNode.bullets?.map((bullet, idx) => (
+                <div key={idx} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '16px', borderRadius: '12px', background: `${subMilestonesNode.color}08`,
+                  border: `1px solid ${subMilestonesNode.color}20`
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: `${subMilestonesNode.color}20`, color: subMilestonesNode.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>
+                      {idx + 1}
+                    </div>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 600, color: '#1E293B' }}>{bullet}</span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B', background: '#FFFFFF', padding: '6px 10px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                    {idx % 2 === 0 ? '3 days' : '1 week'}
+                  </span>
+                </div>
+              ))}
+            </div>
+            
+            <button
+              onClick={() => setSubMilestonesNode(null)}
+              style={{ padding: '14px', borderRadius: '10px', border: 'none', background: '#0F172A', color: '#FFFFFF', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 700, marginTop: '8px' }}
+            >
+              Done
+            </button>
+          </div>
         </div>
       )}
     </div>
