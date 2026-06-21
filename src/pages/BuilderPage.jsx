@@ -10,6 +10,8 @@ const BuilderPage = () => {
   const [engineVersion, setEngineVersion] = useState('gpt-3.5');
   const [showResourceLink, setShowResourceLink] = useState(true);
   const [showProposedPrompt, setShowProposedPrompt] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   
   // Chat / Interaction state
   const [intakePrompt, setIntakePrompt] = useState('Generate CV file for full stack developer');
@@ -104,15 +106,16 @@ const BuilderPage = () => {
       
       {/* ── LEFT SIDEBAR ── */}
       <aside style={{
-        width: '320px',
+        width: isSidebarCollapsed ? '0px' : '320px',
         background: theme.sidebarBg,
-        borderRight: `1px solid ${theme.sidebarBorder}`,
+        borderRight: isSidebarCollapsed ? '0px solid transparent' : `1px solid ${theme.sidebarBorder}`,
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
         flexShrink: 0,
         zIndex: 10,
-        transition: 'background 0.3s ease, border-color 0.3s ease'
+        overflow: 'hidden',
+        transition: 'width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease, background 0.3s ease'
       }}>
         {/* Sidebar Header */}
         <div style={{
@@ -120,29 +123,38 @@ const BuilderPage = () => {
           borderBottom: `1px solid ${theme.sidebarBorder}`,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          minHeight: '65px'
         }}>
           <h2 style={{
-            fontSize: '1.25rem',
+            fontSize: '1.1rem',
             fontWeight: 800,
             letterSpacing: '-0.02em',
             margin: 0,
             color: theme.sidebarText
           }}>
-            Main
+            Main Configuration
           </h2>
-          <span style={{
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            background: 'rgba(79, 70, 229, 0.1)',
-            color: '#4F46E5',
-            padding: '4px 8px',
-            borderRadius: '6px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em'
-          }}>
-            Config
-          </span>
+          <button
+            onClick={() => setIsSidebarCollapsed(true)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: theme.mutedText,
+              fontSize: '1rem',
+              cursor: 'pointer',
+              padding: '4px 8px',
+              borderRadius: '6px',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = theme.sidebarText}
+            title="Collapse Sidebar"
+          >
+            ◀
+          </button>
         </div>
 
         {/* Configurations List */}
@@ -157,9 +169,9 @@ const BuilderPage = () => {
           {/* Mode Selection */}
           <div>
             <div style={{
-              fontSize: '0.85rem',
+              fontSize: '0.78rem',
               fontWeight: 700,
-              color: theme.sidebarText,
+              color: theme.mutedText,
               marginBottom: '10px',
               textTransform: 'uppercase',
               letterSpacing: '0.04em'
@@ -167,126 +179,50 @@ const BuilderPage = () => {
               Mode
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {/* Creative Mode Card */}
-              <div 
-                onClick={() => setSelectedMode('creative')}
-                style={{
-                  padding: '12px',
-                  borderRadius: '12px',
-                  background: selectedMode === 'creative' ? 'rgba(79, 70, 229, 0.05)' : 'transparent',
-                  border: `1.5px solid ${selectedMode === 'creative' ? '#4F46E5' : theme.sidebarBorder}`,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  gap: '10px',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <div style={{
-                  width: '16px',
-                  height: '16px',
-                  borderRadius: '50%',
-                  border: `1.5px solid ${selectedMode === 'creative' ? '#4F46E5' : theme.mutedText}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: '2px',
-                  flexShrink: 0
-                }}>
-                  {selectedMode === 'creative' && (
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4F46E5' }} />
-                  )}
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: theme.sidebarText }}>Creative mode</div>
-                  <div style={{ fontSize: '0.72rem', color: theme.mutedText, lineHeight: 1.4, marginTop: '3px' }}>
-                    designed to assist and inspire creativity, suggest ideas, or generate exploratory layouts.
-                  </div>
-                </div>
-              </div>
+            <div style={{
+              display: 'flex',
+              background: darkMode ? '#1E293B' : '#F1F5F9',
+              border: `1px solid ${theme.sidebarBorder}`,
+              borderRadius: '10px',
+              padding: '2px',
+              gap: '2px'
+            }}>
+              {['creative', 'balanced', 'strict'].map((m) => (
+                <button
+                  type="button"
+                  key={m}
+                  onClick={() => setSelectedMode(m)}
+                  style={{
+                    flex: 1,
+                    padding: '8px 0',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    borderRadius: '8px',
+                    textTransform: 'capitalize',
+                    background: selectedMode === m ? '#4F46E5' : 'transparent',
+                    color: selectedMode === m ? '#FFFFFF' : theme.mutedText,
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
 
-              {/* Balanced Mode Card */}
-              <div 
-                onClick={() => setSelectedMode('balanced')}
-                style={{
-                  padding: '12px',
-                  borderRadius: '12px',
-                  background: selectedMode === 'balanced' ? 'rgba(79, 70, 229, 0.05)' : 'transparent',
-                  border: `1.5px solid ${selectedMode === 'balanced' ? '#4F46E5' : theme.sidebarBorder}`,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  gap: '10px',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <div style={{
-                  width: '16px',
-                  height: '16px',
-                  borderRadius: '50%',
-                  border: `1.5px solid ${selectedMode === 'balanced' ? '#4F46E5' : theme.mutedText}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: '2px',
-                  flexShrink: 0
-                }}>
-                  {selectedMode === 'balanced' && (
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4F46E5' }} />
-                  )}
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: theme.sidebarText }}>Balanced mode</div>
-                  <div style={{ fontSize: '0.72rem', color: theme.mutedText, lineHeight: 1.4, marginTop: '3px' }}>
-                    strikes a balance between providing helpful responses and maintaining structured plans.
-                  </div>
-                </div>
-              </div>
-
-              {/* Strict Mode Card */}
-              <div 
-                onClick={() => setSelectedMode('strict')}
-                style={{
-                  padding: '12px',
-                  borderRadius: '12px',
-                  background: selectedMode === 'strict' ? 'rgba(79, 70, 229, 0.05)' : 'transparent',
-                  border: `1.5px solid ${selectedMode === 'strict' ? '#4F46E5' : theme.sidebarBorder}`,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  gap: '10px',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <div style={{
-                  width: '16px',
-                  height: '16px',
-                  borderRadius: '50%',
-                  border: `1.5px solid ${selectedMode === 'strict' ? '#4F46E5' : theme.mutedText}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: '2px',
-                  flexShrink: 0
-                }}>
-                  {selectedMode === 'strict' && (
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4F46E5' }} />
-                  )}
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: theme.sidebarText }}>Strict mode</div>
-                  <div style={{ fontSize: '0.72rem', color: theme.mutedText, lineHeight: 1.4, marginTop: '3px' }}>
-                    strictly adheres to project parameters, timelines, and predefined roadmap boundaries.
-                  </div>
-                </div>
-              </div>
+            <div style={{ fontSize: '0.72rem', color: theme.mutedText, marginTop: '8px', lineHeight: 1.4, padding: '0 4px' }}>
+              {selectedMode === 'creative' && '💡 Inspires creativity, suggests experimental layouts.'}
+              {selectedMode === 'balanced' && '⚖️ Strikes a balance between flexibility and structure.'}
+              {selectedMode === 'strict' && '🔒 Strictly adheres to parameters and predefined roadmaps.'}
             </div>
           </div>
 
           {/* Model Selection Dropdown */}
           <div>
             <label style={{
-              fontSize: '0.82rem',
+              fontSize: '0.78rem',
               fontWeight: 700,
-              color: theme.sidebarText,
+              color: theme.mutedText,
               display: 'block',
               marginBottom: '8px',
               textTransform: 'uppercase',
@@ -315,73 +251,71 @@ const BuilderPage = () => {
             </select>
           </div>
 
-          {/* Configuration Checkboxes */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: theme.sidebarText, cursor: 'pointer' }}>
-              <input 
-                type="checkbox" 
-                checked={showResourceLink}
-                onChange={(e) => setShowResourceLink(e.target.checked)}
-                style={{ width: '15px', height: '15px', accentColor: '#4F46E5' }} 
-              />
-              Show resource-link
-            </label>
+          {/* Advanced Accordion Trigger */}
+          <div style={{ marginTop: '8px' }}>
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(prev => !prev)}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                color: theme.mutedText,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                padding: '8px 0',
+                borderBottom: `1px solid ${theme.sidebarBorder}`,
+                cursor: 'pointer'
+              }}
+            >
+              <span>⚙️ Options</span>
+              <span>{showAdvanced ? '▼' : '▶'}</span>
+            </button>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: theme.sidebarText, cursor: 'pointer' }}>
-              <input 
-                type="checkbox" 
-                checked={showProposedPrompt}
-                onChange={(e) => setShowProposedPrompt(e.target.checked)}
-                style={{ width: '15px', height: '15px', accentColor: '#4F46E5' }} 
-              />
-              Show proposed prompt
-            </label>
+            {showAdvanced && (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                padding: '12px 4px 4px',
+                animation: 'fadeIn 0.2s ease'
+              }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem', color: theme.sidebarText, cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={showResourceLink}
+                    onChange={(e) => setShowResourceLink(e.target.checked)}
+                    style={{ width: '15px', height: '15px', accentColor: '#4F46E5', cursor: 'pointer' }} 
+                  />
+                  Show resource-link
+                </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', color: theme.sidebarText, cursor: 'pointer' }}>
-              <input 
-                type="checkbox" 
-                checked={darkMode}
-                onChange={(e) => setDarkMode(e.target.checked)}
-                style={{ width: '15px', height: '15px', accentColor: '#4F46E5' }} 
-              />
-              Dark mode
-            </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.82rem', color: theme.sidebarText, cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={showProposedPrompt}
+                    onChange={(e) => setShowProposedPrompt(e.target.checked)}
+                    style={{ width: '15px', height: '15px', accentColor: '#4F46E5', cursor: 'pointer' }} 
+                  />
+                  Show proposed prompt
+                </label>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Sidebar Footer Tabs */}
+        {/* Sidebar Footer */}
         <div style={{
-          padding: '16px',
+          padding: '16px 20px',
           borderTop: `1px solid ${theme.sidebarBorder}`,
-          display: 'flex',
-          gap: '8px'
+          fontSize: '0.72rem',
+          color: theme.mutedText,
+          textAlign: 'center'
         }}>
-          <button style={{
-            flex: 1,
-            padding: '10px',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            borderRadius: '8px',
-            border: `1.5px solid ${theme.sidebarBorder}`,
-            color: theme.sidebarText,
-            textAlign: 'center',
-            cursor: 'default'
-          }}>
-            History
-          </button>
-          <button style={{
-            flex: 1,
-            padding: '10px',
-            fontSize: '0.85rem',
-            fontWeight: 700,
-            borderRadius: '8px',
-            background: '#0F172A',
-            color: '#FFFFFF',
-            textAlign: 'center',
-            cursor: 'default'
-          }}>
-            Main
-          </button>
+          LaunchPad Engine v1.0
         </div>
       </aside>
 
@@ -403,61 +337,112 @@ const BuilderPage = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          flexShrink: 0
+          flexShrink: 0,
+          transition: 'all 0.3s ease'
         }}>
-          {/* Active plan pill */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #4F46E5, #2BDFB0)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '11px',
-              color: '#fff',
-              fontWeight: 700
-            }}>
-              L
-            </div>
-            <div>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: theme.sidebarText }}>Standard plan</span>
-              <span style={{ fontSize: '0.75rem', color: '#10B981', marginLeft: '8px', fontWeight: 600 }}>
-                &bull; Active 35,000 people
-              </span>
+          {/* Left section: Toggle + Back button + Session title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {isSidebarCollapsed && (
+              <button
+                type="button"
+                onClick={() => setIsSidebarCollapsed(false)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: theme.sidebarText,
+                  fontSize: '1.25rem',
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                  borderRadius: '8px',
+                  border: `1px solid ${theme.sidebarBorder}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = theme.sidebarBorder}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                title="Expand Sidebar"
+              >
+                ☰
+              </button>
+            )}
+            
+            <button
+              type="button"
+              onClick={() => navigate('/intake')}
+              style={{
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                color: theme.mutedText,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                transition: 'color 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = theme.sidebarText}
+              onMouseLeave={e => e.currentTarget.style.color = theme.mutedText}
+            >
+              ← Intake
+            </button>
+            <span style={{ color: theme.sidebarBorder }}>|</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.92rem', fontWeight: 700, color: theme.sidebarText }}>Strategy Builder</span>
+              <span style={{
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                background: 'rgba(16, 185, 129, 0.1)',
+                color: '#10B981',
+                padding: '2px 6px',
+                borderRadius: '4px',
+              }}>Drafting</span>
             </div>
           </div>
 
-          {/* Action links & user avatar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <a href="#" style={{ fontSize: '0.8rem', fontWeight: 600, color: '#F59E0B', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              Upgrade Plan ⚡
-            </a>
-            <a href="#" style={{ fontSize: '0.8rem', fontWeight: 600, color: theme.mutedText }}>
-              Help ⓘ
-            </a>
-            <a href="#" style={{ fontSize: '0.8rem', fontWeight: 600, color: theme.mutedText }}>
-              API 🔗
-            </a>
-            
+          {/* Right section: Dark Mode + Profile widget */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Theme Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setDarkMode(prev => !prev)}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                border: `1px solid ${theme.sidebarBorder}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: theme.sidebarText,
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = theme.sidebarBorder}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {darkMode ? '☀️' : '🌙'}
+            </button>
+
             {/* User profile widget */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '4px 10px',
-              borderRadius: '8px',
+              padding: '6px 12px',
+              borderRadius: '999px',
               border: `1px solid ${theme.sidebarBorder}`,
-              background: theme.chatBg
+              background: theme.sidebarBg,
+              cursor: 'default'
             }}>
               <div style={{
-                width: '20px',
-                height: '20px',
-                borderRadius: '4px',
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
                 background: '#4F46E5',
                 color: 'white',
-                fontSize: '10px',
+                fontSize: '11px',
                 fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
@@ -465,7 +450,7 @@ const BuilderPage = () => {
               }}>
                 GG
               </div>
-              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: theme.sidebarText }}>Greg Gregor</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: theme.sidebarText }}>Greg Gregor</span>
             </div>
           </div>
         </header>
