@@ -5,34 +5,7 @@
 
 **LaunchPad** is an interactive, web-based decision-support platform designed to help creators, students, and early professionals clear cognitive overload, stress-test business or project hypotheses, and systematically execute tasks through a dynamic feedback loop.
 
-![LaunchPad Animation](public/images/rocket_animation.gif)
-
-## 🔄 How LaunchPad Processes Information (Flowchart)
-
-```mermaid
-graph TD
-    A[User Idea Input<br/>Raw unstructured text] -->|Idea Intake| B(Assumption Interrogation)
-    B -->|LLM Prompt Chain| C{Weakest Logic Link Identified}
-    C -->|Ask user for evidence| D[User Answers]
-    D --> E(Constraint Mapping)
-    E -->|Evaluate Assets, Time, Budget, Kill Switch| F(Structured Output Generation)
-    F -->|Synthesizer Template| G[Project Summary]
-    F -->|Synthesizer Template| H[Top 3 Core Assumptions]
-    F -->|Synthesizer Template| I[Milestone Roadmap]
-    
-    I -->|Commit to Roadmap| J[Google Calendar Sync Loop]
-    J -->|Schedule Milestones| K(Gated Dashboard)
-    
-    K --> L{Milestone Validated?}
-    L -- Yes --> M[Unlock Next Milestone]
-    L -- No, Stalled --> N{Adaptive Re-routing Engine}
-    
-    N -- Low Severity<br/>Friction --> O[Timeline Shift<br/>Recalculate Dates]
-    N -- High Severity<br/>Structural Roadblock --> P[Tactical Pivot<br/>Rewrite Milestone]
-    
-    O --> K
-    P --> K
-```
+![Dashboard Mockup](public/images/dashboard-mockup.png)
 
 ## 🌟 The Problem
 Often, innovators and creators suffer from cognitive overload when ideating. They struggle to validate their business hypotheses, determine their target audience, and outline the critical assumptions that could make or break their project. Without a structured way to test these assumptions objectively, many projects stall or fail prematurely due to unvalidated constraints or over-reliance on false confidence.
@@ -64,9 +37,7 @@ LaunchPad uses a sequential processing engine to guide the user through five fun
 5. **Stage 5: Human Decision Moment (Responsible AI Layer)**
    - The platform explicitly refuses to make the final "Pivot or Kill" decision. It presents the synthesized logic and places the ultimate choice back into the hands of the user, acting as a guardrail against false confidence.
 
-![Intake Page](public/images/actual_intake.png)
-![Workspace Dashboard](public/images/actual_workspace.png)
-![Strategy Builder](public/images/actual_builder.png)
+![Strategy View](public/images/launchpad-strategy.png)
 
 ## ⚙️ Core Engine & Automation Integrations (The AI Part)
 
@@ -77,7 +48,7 @@ LaunchPad uses a sequential processing engine to guide the user through five fun
   - *Low Severity (Friction):* Triggers a Timeline Shift (recalculates dates and pushes downstream calendar events forward).
   - *High Severity (Structural Roadblock):* Triggers a Tactical Pivot (keeps original timelines but dynamically rewrites the nature of the milestone to suggest lower-cost alternative paths).
 
-![Calendar Integration](public/images/actual_calendar.png)
+![Calendar Integration](public/images/launchpad-calendar.png)
 
 ## 🛠️ Tools Used & Technical Stack
 
