@@ -5,7 +5,7 @@
 
 **LaunchPad** is an interactive, web-based decision-support platform designed to help creators, students, and early professionals clear cognitive overload, stress-test business or project hypotheses, and systematically execute tasks through a dynamic feedback loop.
 
-![Landing Page](public/images/actual_landing.png)
+![LaunchPad Animation](public/images/rocket_animation.gif)
 
 ## 🔄 How LaunchPad Processes Information (Flowchart)
 
