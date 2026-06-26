@@ -5,7 +5,9 @@
 
 **LaunchPad** is an interactive, web-based decision-support platform designed to help creators, students, and early professionals clear cognitive overload, stress-test business or project hypotheses, and systematically execute tasks through a dynamic feedback loop.
 
-![Dashboard Mockup](public/images/dashboard-mockup.png)
+![LaunchPad Landing Page](public/images/actual_landing.png)
+
+---
 
 ## 🌟 The Problem
 Often, innovators and creators suffer from cognitive overload when ideating. They struggle to validate their business hypotheses, determine their target audience, and outline the critical assumptions that could make or break their project. Without a structured way to test these assumptions objectively, many projects stall or fail prematurely due to unvalidated constraints or over-reliance on false confidence.
@@ -22,46 +24,112 @@ LaunchPad acts as a thinking mirror and structured synthesizer. It guides users 
 - **Students & Researchers:** Undergraduates mapping out complex research or structured validation for academic projects.
 - **Early Professionals & Founders:** Entrepreneurs needing a lean, unbiased system to test their assumptions rigorously before risking large amounts of capital or time.
 
-## 🏗️ Architecture & How It Works
+---
 
-LaunchPad uses a sequential processing engine to guide the user through five functional stages:
+## 🗺️ Process & Information Flow (How the App Works)
 
-1. **Stage 1: Idea Intake** 
-   - A minimalist conversational interface captures the raw, unstructured project idea string ("Tell me what you're trying to build or do").
-2. **Stage 2: Assumption Interrogation**
-   - An LLM prompt chain acts as an interrogator, parsing the raw text against standard business validation models (Lean Startup frameworks). It isolates the weakest logical link and prompts the user for evidence.
-3. **Stage 3: Constraint Mapping**
-   - The platform dynamically assesses real-world human constraints based on user inputs, balancing the ambition of the project with actual available resources.
-4. **Stage 4: Structured Output Generation**
-   - The AI passes the accumulated context into a synthesizer template, outputting a concise project summary, the **Top 3 Core Assumptions**, and a **Milestone Roadmap** (including a 48-Hour Micro-Action and an Uncomfortable Risk assessment).
-5. **Stage 5: Human Decision Moment (Responsible AI Layer)**
-   - The platform explicitly refuses to make the final "Pivot or Kill" decision. It presents the synthesized logic and places the ultimate choice back into the hands of the user, acting as a guardrail against false confidence.
+Here is a visual flowchart showcasing how LaunchPad captures user inputs, interrogates assumptions against business models, evaluates constraints, outputs actionable plans, and dynamically reroutes timelines or strategies when milestones are stalled:
 
-![Strategy View](public/images/launchpad-strategy.png)
+```mermaid
+graph TD
+    A[User Raw Idea] -->|Stage 1: Input| B(AI Conversational Engine)
+    B -->|Stage 2: Assumption Interrogation| C{Lean Validation Model}
+    C -->|Identify Logic Gaps| D[Weakest Logical Links]
+    
+    E[User Constraints] -->|Stage 3: Mapping| F(Asset & Kill Switch Evaluation)
+    D & F -->|Stage 4: Synthesis| G(Structured Output Generator)
+    
+    G --> H[Idea Sharpening]
+    G --> I[Top 3 Core Assumptions]
+    G --> J[Milestone Roadmap & 48-Hr Micro-Action]
+    
+    J --> K{Human Decision Moment}
+    K -->|Reject / Refine| L[Idea Dropped/Refined]
+    K -->|Accept & Commit| M[Google Calendar & Workspace Sync]
+    
+    M --> N[Interactive Workspace / Kanban Dashboard]
+    N --> O{Milestone Checkpoint}
+    O -->|Milestone Met| P[Unlock Next Phase & Sync Calendar]
+    O -->|Milestone Stalled| Q[Adaptive Re-routing Engine]
+    
+    Q -->|Low Severity Failure| R[Timeline Shift: Recalculate Dates]
+    Q -->|High Severity Failure| S[Tactical Pivot: Rewrite Milestones]
+    R & S -->|Update UI & Calendar| N
+```
+
+---
+
+## 🏗️ Stage-by-Stage App Walkthrough
+
+### 💬 Stage 1 & 2: Idea Intake & Assumption Interrogation
+The journey starts with a clean, distraction-free conversational chat interface. The AI guide prompts you to explain your idea. Once submitted, LaunchPad's LLM prompt chain immediately stress-tests your idea, isolating logical gaps (e.g. customer segmentation, willingness to pay) and prompting you to clarify them.
+
+![Intake Chat Interface](public/images/actual_intake.png)
+
+### 🛠️ Stage 3: Builder Page (Constraint Mapping)
+In the builder page, users specify industry-related parameters, identify target customers, and map out concrete constraints:
+* **Available Hours / Week**
+* **Technical Skill Level**
+* **Available Budget**
+* **The "Kill Switch"** (your self-identified fatal flaw)
+
+![Project Builder & Constraints](public/images/actual_builder.png)
+
+### 📊 Stage 4: Workspace Dashboard
+Once validated, a structured project summary is generated. The interactive Workspace page provides a dashboard displaying:
+* **Idea Sharpening:** A concise, validated overview of your product/service.
+* **Top 3 Core Assumptions:** The fundamental conditions that must be true for your project to survive.
+* **The 48-Hour Micro-Action:** One simple, actionable task to break initial builder inertia.
+* **The Uncomfortable Risk:** A brutal, objective assessment of what could go wrong.
+
+![Interactive Workspace](public/images/actual_workspace.png)
+
+### 📅 Stage 5: Gated Calendar & Multi-Layout Workspace
+After accepting and committing to the roadmap, the application redirects you to a multi-layout dashboard with 4 core tabs:
+1. **Calendar View:** A standard calendar grid displaying milestone dates and proactive check-in events.
+2. **Mind Map View:** An interactive graph database showing ideas connected to assumptions, constraints, and risks.
+3. **Timeline View:** A clean Gantt chart visualizing Milestones 1, 2, and 3.
+4. **3D View:** A futuristic Three.js carousel visualizing milestones and task nodes in 3D space.
+
+*Note: In compliance with the Gated Dashboard logic, downstream milestones remain greyed out (`disabled=True`) until the user validates previous milestones.*
+
+#### Calendar Grid View
+![Calendar Grid View](public/images/actual_calendar.png)
+
+#### Mind Map View
+![Mind Map View](public/images/cal_mindmap_view.png)
+
+#### Gantt Timeline View
+![Gantt Timeline View](public/images/cal_timeline_view.png)
+
+#### Three.js 3D Node View
+![Three.js 3D View](public/images/cal_3d_view.png)
+
+---
 
 ## ⚙️ Core Engine & Automation Integrations (The AI Part)
 
 - **AI Orchestration & Sequential Routing:** LaunchPad leverages chain-of-thought Natural Language Processing (NLP) and decision-support framework chains to process logic gaps progressively. Instead of one massive prompt, the system chains Stage 1 inputs into Stage 2 questions, and passes those answers into Stage 4 synthesis.
-- **Google Calendar Sync Loop:** Once a user commits to a roadmap, LaunchPad handles Google Calendar OAuth insertion. It translates phased roadmap days into calendar block boundaries relative to real-time (e.g., locking a 5-day duration for Milestone 1) and automatically schedules subtle ambient check-in reminders.
-- **Gated Dashboard & Milestone Logic:** The application serves as an interactive kanban board controlling state. Future milestones remain disabled and greyed-out until the prerequisite actions are actively validated.
-- **Adaptive Re-Routing Engine (Failure Logic):** If a user hits an impasse, the app calculates a severity score based on feedback. 
-  - *Low Severity (Friction):* Triggers a Timeline Shift (recalculates dates and pushes downstream calendar events forward).
-  - *High Severity (Structural Roadblock):* Triggers a Tactical Pivot (keeps original timelines but dynamically rewrites the nature of the milestone to suggest lower-cost alternative paths).
+- **Google Calendar Sync Loop:** Once committed, LaunchPad triggers a synchronization loop that connects via OAuth (or webhooks like Make/Zapier) to generate a dedicated calendar named `"LaunchPad: [Project Name]"`. It places milestone due dates relative to `DateTime.now()` and maps out proactive check-in events as ambient notification reminders.
+- **Adaptive Re-Routing Engine (Failure Logic):** If a user hits an impasse and reports failure on a milestone, LaunchPad does not stall. The AI evaluates the feedback and assigns a severity category:
+  - *Low Severity (Friction):* Triggers a **Timeline Shift** (recalculates dates and pushes downstream calendar events forward).
+  - *High Severity (Structural Roadblock):* Triggers a **Tactical Pivot** (repositions the business model by dynamically rewriting milestones while keeping timeline boundaries intact).
 
-![Calendar Integration](public/images/launchpad-calendar.png)
+---
 
 ## 🛠️ Tools Used & Technical Stack
 
-To keep implementation fast, responsive, and robust, LaunchPad is built with the following technologies:
+LaunchPad is designed with a lightweight, responsive stack optimized for high-performance interactive states:
 
-- **Frontend & Dashboard:** **React** + **Vite** for a lightning-fast, state-driven UI experience. React Router handles seamless navigation between Intake, Workspace, Builder, and Calendar views.
-- **Styling:** Vanilla CSS combined with **Lucide React** for minimal, clean iconography and modern design aesthetics.
-- **AI Orchestration Backend:** Designed around visual LLM orchestration concepts (such as LangChain/LangGraph) to easily chain and manage conversation state without bloated logic.
-- **Calendar Automation:** Google Calendar API logic streamlined for dynamic event creation, translating roadmap objects directly into scheduled JSON payloads.
+- **Frontend Core:** **React (v19)** powered by **Vite** for rapid bundling and hot module replacement (HMR).
+- **Routing:** **React Router (v7)** handles clean routing between `/`, `/intake`, `/builder`, `/workspace`, and `/calendar`.
+- **Iconography:** **Lucide React** for modern, crisp UI indicators.
+- **3D Rendering:** **Three.js** provides the interactive 3D node carousel visualization.
+- **Styling:** Custom vanilla CSS (`index.css` & `App.css`) for high-performance glassmorphism, responsive grid layouts, and custom dark mode themes.
 
 ## 🚀 Getting Started
 
-Follow these steps to run LaunchPad locally on your machine:
+Follow these steps to run LaunchPad locally:
 
 1. **Clone the repository:**
    ```bash
@@ -70,13 +138,13 @@ Follow these steps to run LaunchPad locally on your machine:
    ```
 
 2. **Install Dependencies:**
-   Ensure you have Node.js installed, then run:
+   Make sure you have Node.js installed, then execute:
    ```bash
    npm install
    ```
 
 3. **Configure Environment Variables:**
-   Rename `.env.example` to `.env` and provide your respective API keys (e.g., for AI Orchestration and Google Calendar).
+   Create a `.env` file in the root directory based on `.env.example` to provide your required API keys (e.g., Google OAuth client credentials and backend endpoints).
 
 4. **Run the Development Server:**
    ```bash
@@ -84,7 +152,7 @@ Follow these steps to run LaunchPad locally on your machine:
    ```
 
 5. **Access the App:** 
-   Open your web browser and navigate to `http://localhost:5173`.
+   Open your browser and navigate to `http://localhost:5173`.
 
 ---
 
